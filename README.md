@@ -1,11 +1,18 @@
 <!-- markdownlint-disable MD030 -->
 
-# OpenIdeas
+# IdeaFlow
 
-Ideus visual-agent canvas. **Origin:** [internetmatt/OpenIdeas](https://github.com/internetmatt/OpenIdeas). Apache-2.0 **upstream** is [FlowiseAI/Flowise](https://github.com/FlowiseAI/Flowise) — we do not ship the product as “Flowise.”
+IdeaFlow is a tenant-owned AI BizOps workspace for turning ideas into collaborative, executable AI operations.
 
-- Local Ideus port: **[http://localhost:3010](http://localhost:3010)** (see [`docs/IDEUS-PACKAGING.md`](./docs/IDEUS-PACKAGING.md); upstream docs below still mention `:3000`)
-- Core canvas swap: [`packages/server/src/ideus-core/`](./packages/server/src/ideus-core/README.md) — point AskDilly-Core `IDEUS_FLOWISE_BASE_URL` here, not stock `flowiseai/flowise`
+An idea is a conversation session with an attached chatflow. Assistants can have their own agentflows, and Driver.js walkthroughs can animate either flow. Projecto provisions each owner's tenant, site, identity, and inference access; IdeaFlow owns the workspace, team, flows, conversations, approvals, and audit history.
+
+This repository is transitioning from **OpenIdeas/Ideus** to **IdeaFlow**. It retains the Flowise-derived execution engine while the product UI moves to the DeerFlow foundation with `@internetmatt/design-tokens`. The former Ideas/AIONUI application is not a runtime dependency.
+
+- Architecture and integration contract: [`docs/IDEAFLOW-ARCHITECTURE.md`](./docs/IDEAFLOW-ARCHITECTURE.md)
+- Local development: **[http://localhost:3010](http://localhost:3010)**
+- Current packaging notes: [`docs/IDEUS-PACKAGING.md`](./docs/IDEUS-PACKAGING.md)
+- Core schema adapter: [`packages/server/src/ideus-core/`](./packages/server/src/ideus-core/README.md)
+- Upstream engine: [FlowiseAI/Flowise](https://github.com/FlowiseAI/Flowise), Apache-2.0
 
 ---
 

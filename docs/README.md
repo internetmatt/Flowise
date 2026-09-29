@@ -1,7 +1,14 @@
-# OpenIdeas docs (Ideus)
+# IdeaFlow documentation
 
-This repo is the Ideus **OpenIdeas** canvas (Apache-2.0 upstream: FlowiseAI/Flowise). The packaging card for AskDilly-Core VitePress is [`IDEUS-PACKAGING.md`](./IDEUS-PACKAGING.md).
+This repository is transitioning from **OpenIdeas/Ideus** to **IdeaFlow**, the tenant-owned AI BizOps workspace provisioned by Projecto.
 
-Local port: **3010**. Core schema adapter: [`packages/server/src/ideus-core/`](../packages/server/src/ideus-core/README.md).
+Start with the authoritative [IdeaFlow architecture and integration contract](./IDEAFLOW-ARCHITECTURE.md). It defines product boundaries, tenancy, Projecto identity and inference integration, Flowise chatflow/agentflow associations, Driver.js walkthroughs, and the dedicated Iggy-derived desktop contract.
 
-Package manuals stay here (`packages/agentflow`, `packages/ui`, `packages/server`). The Flowise GitBook parity mirror used for rewrite lives in AskDilly-Core `/flowise/`, not in this folder.
+Current transition references:
+
+- Local development port: **3010**
+- Existing packaging card: [`IDEUS-PACKAGING.md`](./IDEUS-PACKAGING.md)
+- Existing core schema adapter: [`packages/server/src/ideus-core/`](../packages/server/src/ideus-core/README.md)
+- Package manuals: `packages/agentflow`, `packages/ui`, and `packages/server`
+
+Legacy OpenIdeas and Ideus names remain temporarily where changing them would break runtime consumers. New product-facing work should use **IdeaFlow**.
