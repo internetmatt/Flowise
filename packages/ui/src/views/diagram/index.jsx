@@ -15,14 +15,6 @@ const EMPTY_DIAGRAM_FLOW_DATA = JSON.stringify({
 
 let createInflight = null
 
-function hostGateway() {
-    const host = window.__PROJECTO_HOST_CONFIG__ || {}
-    return {
-        baseUrl: import.meta.env.VITE_PROJECTO_INFERENCE_BASE || host.PROJECTO_INFERENCE_BASE || 'http://127.0.0.1:4716/v1',
-        apiKey: import.meta.env.VITE_PROJECTO_OPERATOR_API_KEY || host.PROJECTO_OPERATOR_API_KEY || ''
-    }
-}
-
 const DiagramView = () => {
     const { id } = useParams()
     const navigate = useNavigate()
@@ -103,7 +95,7 @@ const DiagramView = () => {
                 handle = api.mount(element, {
                     flowData,
                     assetBase: diagramAssetBase(),
-                    gateway: hostGateway(),
+                    gateway: { baseUrl: `${baseURL}/api/v1/diagram-inference/${encodeURIComponent(id)}` },
                     signalingBase: `${baseURL}/api/v1/diagram-signaling`,
                     diagramId: id,
                     onChange: (next) => {

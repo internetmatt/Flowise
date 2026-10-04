@@ -6,7 +6,7 @@ import './studio/studio.css'
 export type DiagramMountProps = {
     flowData: string
     assetBase?: string
-    gateway?: { baseUrl?: string; apiKey?: string }
+    gateway?: { baseUrl?: string }
     signalingBase?: string
     diagramId?: string
     onSave?: (flowData: string) => void | Promise<void>

@@ -2,7 +2,8 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { resolve } from 'path'
 import dotenv from 'dotenv'
-import { createReadStream, existsSync, cpSync, statSync } from 'fs'
+import { stageDiagramAssets } from './scripts/stageDiagramAssets.mjs'
+import { createReadStream, existsSync, statSync } from 'fs'
 
 function diagramStudioPlugin() {
     const dist = resolve(__dirname, '../diagram/dist')
@@ -34,8 +35,7 @@ function diagramStudioPlugin() {
             server.middlewares.use(serveDist)
         },
         closeBundle() {
-            if (!existsSync(dist)) return
-            cpSync(dist, resolve(__dirname, 'build/diagram-studio'), { recursive: true })
+            stageDiagramAssets(dist, resolve(__dirname, 'build/diagram-studio'))
         }
     }
 }

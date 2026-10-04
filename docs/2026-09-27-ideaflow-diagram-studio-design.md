@@ -64,12 +64,12 @@ Save path: editor emits the v1 blob; the existing chatflow update writes `flowDa
 
 ## Generation
 
-One client inside `@openideas/diagram`. It speaks the OpenAI chat-completions API on the Projecto inference gateway:
+The browser client inside `@openideas/diagram` calls the configured, workspace-authorized IdeaFlow API proxy at `/api/v1/diagram-inference/:id`. The server speaks the OpenAI chat-completions API on the Projecto inference gateway:
 
 -   `POST {base}/v1/chat/completions`
 -   `GET {base}/v1/models` for the model list
 -   Default base `http://127.0.0.1:4716/v1`
--   `Authorization: Bearer` is the operator key the Projecto host already uses for `:4716` (`PROJECTO_OPERATOR_API_KEY`). The diagram package does not collect vendor keys.
+-   Only the IdeaFlow server reads `PROJECTO_OPERATOR_API_KEY` and `PROJECTO_INFERENCE_BASE`. It sends the operator bearer to Projecto, which retains token validation and model policy authority. Never put the key in Vite variables or `window.__PROJECTO_HOST_CONFIG__`. Browser requests use the existing authenticated IdeaFlow session, a workspace-owned diagram/agent ID, and record-type view/update permissions. The proxy exposes only model listing and bounded Mermaid generation, not arbitrary gateway operations.
 
 The gateway owns lanes (`projecto/*` local vLLM, `pinternet/*`, and the rest of its routing). The panel picks a model from `/v1/models`. It does not call Ollama, vLLM `:8000`, or a third-party provider directly.
 

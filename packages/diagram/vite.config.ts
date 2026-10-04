@@ -4,6 +4,10 @@ import { defineConfig } from 'vite'
 
 export default defineConfig({
     plugins: [react()],
+    // Vite library mode leaves NODE_ENV for a consuming bundler by default.
+    // This IIFE is loaded directly by a browser, with no Node process global.
+    // Define this one non-secret constant; never serialize process.env.
+    define: { 'process.env.NODE_ENV': JSON.stringify('production') },
     build: {
         lib: {
             entry: resolve(__dirname, 'src/mount.tsx'),
