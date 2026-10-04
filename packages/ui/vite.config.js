@@ -2,6 +2,43 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { resolve } from 'path'
 import dotenv from 'dotenv'
+import { createReadStream, existsSync, cpSync, statSync } from 'fs'
+
+function diagramStudioPlugin() {
+    const dist = resolve(__dirname, '../diagram/dist')
+    const serveDist = (req, res, next) => {
+        const url = req.url || ''
+        if (!url.startsWith('/diagram-studio/')) return next()
+        const rel = decodeURIComponent(url.slice('/diagram-studio/'.length).split('?')[0])
+        if (!rel || rel.includes('..')) {
+            res.statusCode = 400
+            res.end('bad path')
+            return
+        }
+        const target = resolve(dist, rel)
+        if (!target.startsWith(dist) || !existsSync(target) || !statSync(target).isFile()) {
+            res.statusCode = 404
+            res.end('diagram bundle missing — build @openideas/diagram')
+            return
+        }
+        const type = target.endsWith('.css') ? 'text/css' : 'text/javascript'
+        res.setHeader('Content-Type', type)
+        createReadStream(target).pipe(res)
+    }
+    return {
+        name: 'openideas-diagram-studio',
+        configureServer(server) {
+            server.middlewares.use(serveDist)
+        },
+        configurePreviewServer(server) {
+            server.middlewares.use(serveDist)
+        },
+        closeBundle() {
+            if (!existsSync(dist)) return
+            cpSync(dist, resolve(__dirname, 'build/diagram-studio'), { recursive: true })
+        }
+    }
+}
 
 export default defineConfig(async ({ mode }) => {
     let proxy = undefined
@@ -21,7 +58,7 @@ export default defineConfig(async ({ mode }) => {
 
     dotenv.config()
     return {
-        plugins: [react()],
+        plugins: [react(), diagramStudioPlugin()],
         resolve: {
             alias: {
                 '@': resolve(__dirname, 'src'),

@@ -41,7 +41,7 @@ jest.mock('../../utils/getRunningExpressApp', () => ({
 }))
 jest.mock('../../database/entities/ChatFlow', () => ({
     ChatFlow: class ChatFlow {},
-    EnumChatflowType: { AGENTFLOW: 'AGENTFLOW', CHATFLOW: 'CHATFLOW', MULTIAGENT: 'MULTIAGENT' }
+    EnumChatflowType: { AGENTFLOW: 'AGENTFLOW', CHATFLOW: 'CHATFLOW', MULTIAGENT: 'MULTIAGENT', DIAGRAM: 'DIAGRAM' }
 }))
 jest.mock('../../database/entities/ChatMessage', () => ({ ChatMessage: class ChatMessage {} }))
 jest.mock('../../database/entities/ChatMessageFeedback', () => ({ ChatMessageFeedback: class ChatMessageFeedback {} }))
@@ -591,5 +591,43 @@ describe('updateChatflow', () => {
 
         expect(mockCreateOrUpdateSchedule).not.toHaveBeenCalled()
         expect(mockDeleteScheduleForTarget).not.toHaveBeenCalled()
+    })
+})
+
+describe('DIAGRAM flowData', () => {
+    it('creating and loading a DIAGRAM round-trips flowData as an opaque string', async () => {
+        const flowData = JSON.stringify({
+            schema: 'ideaflow-diagram/v1',
+            family: 'flowchart',
+            dsl: 'flowchart TD\n  A --> B',
+            nodes: [{ id: 'A' }],
+            edges: [],
+            viewport: { x: 1, y: 2, zoom: 1 }
+        })
+        const record = makeChatflow({
+            id: 'diagram-1',
+            type: 'DIAGRAM',
+            name: 'Architecture sketch',
+            flowData
+        })
+        mockRepo.save.mockResolvedValue(record)
+        mockRepo.findOne.mockResolvedValue(record)
+
+        const saved = await chatflowsService.saveChatflow(
+            record as any,
+            SAVE_ARGS.orgId,
+            SAVE_ARGS.workspaceId,
+            SAVE_ARGS.subscriptionId,
+            SAVE_ARGS.usageCacheManager
+        )
+
+        expect(mockRepo.create).toHaveBeenCalledWith(expect.objectContaining({ type: 'DIAGRAM', flowData }))
+        expect(saved.flowData).toBe(flowData)
+        expect(saved.type).toBe('DIAGRAM')
+
+        const loaded = await chatflowsService.getChatflowById('diagram-1', 'ws-1')
+        expect(loaded.flowData).toBe(flowData)
+        expect(loaded.flowData).toBe(saved.flowData)
+        expect(JSON.parse(loaded.flowData)).toEqual(JSON.parse(flowData))
     })
 })

@@ -4,6 +4,8 @@ const getAllChatflows = (params) => client.get('/chatflows?type=CHATFLOW', { par
 
 const getAllAgentflows = (type, params) => client.get(`/chatflows?type=${type}`, { params })
 
+const getAllDiagrams = (params) => client.get('/chatflows?type=DIAGRAM', { params })
+
 const getSpecificChatflow = (id) => client.get(`/chatflows/${id}`)
 
 const getSpecificChatflowFromPublicEndpoint = (id) => client.get(`/public-chatflows/${id}`)
@@ -37,6 +39,7 @@ const deleteScheduleTriggerLogs = (id, logIds) => client.delete(`/chatflows/${id
 export default {
     getAllChatflows,
     getAllAgentflows,
+    getAllDiagrams,
     getSpecificChatflow,
     getSpecificChatflowFromPublicEndpoint,
     createNewChatflow,

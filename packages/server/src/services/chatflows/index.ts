@@ -71,6 +71,10 @@ const checkIfChatflowIsValidForStreaming = async (chatflowId: string): Promise<a
             return { isStreaming: true }
         }
 
+        if (chatflow.type === 'DIAGRAM') {
+            return { isStreaming: false }
+        }
+
         /*** Get Ending Node with Directed Graph  ***/
         const flowData = chatflow.flowData
         const parsedFlowData: IReactFlowObject = JSON.parse(flowData)
@@ -191,6 +195,8 @@ const getAllChatflows = async (type?: ChatflowType, workspaceId?: string, page: 
         } else if (type === 'CHATFLOW') {
             // fetch all chatflows that are not agentflow
             queryBuilder.andWhere('chat_flow.type = :type', { type: 'CHATFLOW' })
+        } else if (type === 'DIAGRAM') {
+            queryBuilder.andWhere('chat_flow.type = :type', { type: 'DIAGRAM' })
         }
         if (workspaceId) queryBuilder.andWhere('chat_flow.workspaceId = :workspaceId', { workspaceId })
         const [data, total] = await queryBuilder.getManyAndCount()

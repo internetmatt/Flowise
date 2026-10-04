@@ -73,8 +73,10 @@ const deleteChatflow = async (req: Request, res: Response, next: NextFunction) =
             userPermittedTypes.push(EnumChatflowType.AGENTFLOW)
             userPermittedTypes.push(EnumChatflowType.MULTIAGENT)
             userPermittedTypes.push(EnumChatflowType.ASSISTANT)
+            userPermittedTypes.push(EnumChatflowType.DIAGRAM)
         } else {
             if (permissions.includes(`chatflows:delete`)) userPermittedTypes.push(EnumChatflowType.CHATFLOW)
+            if (permissions.includes(`chatflows:delete`)) userPermittedTypes.push(EnumChatflowType.DIAGRAM)
             if (permissions.includes(`agentflows:delete`)) userPermittedTypes.push(EnumChatflowType.AGENTFLOW)
             if (permissions.includes(`agentflows:delete`)) userPermittedTypes.push(EnumChatflowType.MULTIAGENT)
             if (permissions.includes(`assistants:delete`)) userPermittedTypes.push(EnumChatflowType.ASSISTANT)
