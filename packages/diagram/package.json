@@ -1,0 +1,32 @@
+{
+    "name": "@openideas/diagram",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "description": "IdeaFlow diagram studio. Own bundle (React 19, XYFlow 12). The Flowise UI loads dist/diagram.js and does not import this package.",
+    "exports": {
+        ".": "./src/index.ts"
+    },
+    "scripts": {
+        "build": "vite build && node scripts/stage-worker.mjs",
+        "test": "vitest run",
+        "dev": "vite"
+    },
+    "dependencies": {
+        "@xyflow/react": "^12.6.4",
+        "elkjs": "^0.9.3",
+        "mermaid": "^11.6.0",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+        "yjs": "^13.6.24",
+        "zustand": "^5.0.3"
+    },
+    "devDependencies": {
+        "@types/react": "^19.0.10",
+        "@types/react-dom": "^19.0.4",
+        "@vitejs/plugin-react": "^4.3.4",
+        "typescript": "^5.4.5",
+        "vite": "^5.4.14",
+        "vitest": "^3.0.9"
+    }
+}

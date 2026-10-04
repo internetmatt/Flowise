@@ -1,0 +1,19 @@
+{
+    "schema": "ideaflow-schematic-book/v1",
+    "id": "ideaflow-parts-v1",
+    "title": "IdeaFlow parts book (fixture). Not a building or electrical code.",
+    "parts": {
+        "Records": { "kind": "source" },
+        "Skill": { "kind": "process" },
+        "Svg": { "kind": "export" },
+        "Spots": { "kind": "export" },
+        "Supply": { "kind": "source" },
+        "Load": { "kind": "sink" }
+    },
+    "edges": [
+        { "from": "Records", "to": "Skill" },
+        { "from": "Skill", "to": "Svg" },
+        { "from": "Skill", "to": "Spots" },
+        { "from": "Supply", "to": "Load" }
+    ]
+}
