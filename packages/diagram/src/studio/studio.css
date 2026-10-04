@@ -1,0 +1,116 @@
+.ideaflow-studio {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    background: #f7f8f5;
+    color: #1c241e;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.ideaflow-toolbar,
+.ideaflow-side button,
+.ideaflow-toolbar button {
+    font: inherit;
+}
+
+.ideaflow-toolbar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 8px 12px;
+    border-bottom: 1px solid #d5ddd6;
+    background: #fff;
+}
+
+.ideaflow-toolbar button,
+.ideaflow-side button {
+    border: 1px solid #c5d0c6;
+    background: #fff;
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+}
+
+.ideaflow-toolbar button:disabled,
+.ideaflow-side button:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.ideaflow-body {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    flex: 1;
+    min-height: 0;
+}
+
+.ideaflow-body .react-flow {
+    min-height: 0;
+    background: #f7f8f5;
+}
+
+.ideaflow-side {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+    border-left: 1px solid #d5ddd6;
+    background: #fff;
+    overflow: auto;
+}
+
+.ideaflow-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 13px;
+}
+
+.ideaflow-field textarea,
+.ideaflow-field input,
+.ideaflow-field select {
+    font: inherit;
+    border: 1px solid #c5d0c6;
+    border-radius: 6px;
+    padding: 6px 8px;
+}
+
+.ideaflow-field textarea {
+    min-height: 140px;
+    resize: vertical;
+}
+
+.ideaflow-error {
+    margin: 0;
+    color: #8d2a2a;
+    font-size: 13px;
+    white-space: pre-wrap;
+}
+
+.ideaflow-note {
+    color: #1f6b4a;
+    font-size: 13px;
+}
+
+.ideaflow-readonly {
+    padding: 24px;
+}
+
+.ideaflow-node {
+    min-width: 120px;
+    padding: 10px 14px;
+    border: 1.5px solid #1f6b4a;
+    background: #f4f7f2;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.ideaflow-node-diamond {
+    border-radius: 2px;
+    transform: rotate(0deg);
+}
+
+.ideaflow-node.is-selected {
+    outline: 2px solid #1f6b4a;
+}

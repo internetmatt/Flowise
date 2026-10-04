@@ -1,0 +1,38 @@
+{
+    "schema": "ideaflow-diagram/v1",
+    "family": "flowchart",
+    "dsl": "flowchart TD\n  Search[OpenFlowKit search] --> Vault[Vault]\n  Search --> Projects[Projects / IdeaFlow]\n  Search --> Cursor[Cursor thread]\n  Search --> Agy[agy]\n  Search --> Grok[Grok]\n  Search --> ChatGPT[ChatGPT]\n  Search --> Claude[Claude]\n  Projects --> Design[diagram studio design]\n  Cursor --> Design\n  Vault --> NoCard[no schematic card]\n  Agy --> NoHit[no AutoCAD hit]\n  Grok --> SignedOut[signed out]\n  ChatGPT --> SignedOut\n  Claude --> SignedOut\n  Design --> Next[schematic family + checker]\n",
+    "viewport": { "x": 0, "y": 0, "zoom": 1 },
+    "nodes": [
+        { "id": "Search", "position": { "x": 420, "y": 0 }, "data": { "label": "OpenFlowKit search", "shape": "round" } },
+        { "id": "Vault", "position": { "x": 0, "y": 140 }, "data": { "label": "Vault" } },
+        { "id": "Projects", "position": { "x": 180, "y": 140 }, "data": { "label": "Projects / IdeaFlow" } },
+        { "id": "Cursor", "position": { "x": 400, "y": 140 }, "data": { "label": "Cursor thread" } },
+        { "id": "Agy", "position": { "x": 600, "y": 140 }, "data": { "label": "agy" } },
+        { "id": "Grok", "position": { "x": 760, "y": 140 }, "data": { "label": "Grok" } },
+        { "id": "ChatGPT", "position": { "x": 920, "y": 140 }, "data": { "label": "ChatGPT" } },
+        { "id": "Claude", "position": { "x": 1100, "y": 140 }, "data": { "label": "Claude" } },
+        { "id": "NoCard", "position": { "x": 0, "y": 300 }, "data": { "label": "no schematic card" } },
+        { "id": "Design", "position": { "x": 280, "y": 300 }, "data": { "label": "diagram studio design" } },
+        { "id": "NoHit", "position": { "x": 600, "y": 300 }, "data": { "label": "no AutoCAD hit" } },
+        { "id": "SignedOut", "position": { "x": 920, "y": 300 }, "data": { "label": "signed out" } },
+        { "id": "Next", "position": { "x": 280, "y": 460 }, "data": { "label": "schematic family + checker", "shape": "diamond" } }
+    ],
+    "edges": [
+        { "id": "e1", "source": "Search", "target": "Vault" },
+        { "id": "e2", "source": "Search", "target": "Projects" },
+        { "id": "e3", "source": "Search", "target": "Cursor" },
+        { "id": "e4", "source": "Search", "target": "Agy" },
+        { "id": "e5", "source": "Search", "target": "Grok" },
+        { "id": "e6", "source": "Search", "target": "ChatGPT" },
+        { "id": "e7", "source": "Search", "target": "Claude" },
+        { "id": "e8", "source": "Vault", "target": "NoCard" },
+        { "id": "e9", "source": "Projects", "target": "Design" },
+        { "id": "e10", "source": "Cursor", "target": "Design" },
+        { "id": "e11", "source": "Agy", "target": "NoHit" },
+        { "id": "e12", "source": "Grok", "target": "SignedOut" },
+        { "id": "e13", "source": "ChatGPT", "target": "SignedOut" },
+        { "id": "e14", "source": "Claude", "target": "SignedOut" },
+        { "id": "e15", "source": "Design", "target": "Next" }
+    ]
+}

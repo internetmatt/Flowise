@@ -1,0 +1,17 @@
+{
+    "schema": "ideaflow-diagram/v1",
+    "family": "schematic",
+    "dsl": "schematic LR\n  Records --> Skill\n  Skill --> Svg\n  Skill --> Spots",
+    "viewport": { "x": 0, "y": 0, "zoom": 1 },
+    "nodes": [
+        { "id": "Records", "position": { "x": 40, "y": 160 }, "data": { "label": "Projecto records" } },
+        { "id": "Skill", "position": { "x": 320, "y": 160 }, "data": { "label": "docs and spots" } },
+        { "id": "Svg", "position": { "x": 620, "y": 60 }, "data": { "label": "internal SVG" } },
+        { "id": "Spots", "position": { "x": 620, "y": 260 }, "data": { "label": "Hyperframes spot" } }
+    ],
+    "edges": [
+        { "id": "e1", "source": "Records", "target": "Skill" },
+        { "id": "e2", "source": "Skill", "target": "Svg" },
+        { "id": "e3", "source": "Skill", "target": "Spots" }
+    ]
+}
