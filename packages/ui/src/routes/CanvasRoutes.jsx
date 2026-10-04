@@ -8,8 +8,9 @@ import { RequireAuth } from '@/routes/RequireAuth'
 // canvas routing
 const Canvas = Loadable(lazy(() => import('@/views/canvas')))
 const MarketplaceCanvas = Loadable(lazy(() => import('@/views/marketplaces/MarketplaceCanvas')))
-const CanvasV2 = Loadable(lazy(() => import('@/views/agentflowsv2/Canvas')))
 const MarketplaceCanvasV2 = Loadable(lazy(() => import('@/views/agentflowsv2/MarketplaceCanvas')))
+const DiagramView = Loadable(lazy(() => import('@/views/diagram')))
+const DiagramAgentView = Loadable(lazy(() => import('@/views/agentcanvas/DiagramAgent')))
 
 // ==============================|| CANVAS ROUTING ||============================== //
 
@@ -53,7 +54,7 @@ const CanvasRoutes = {
             path: '/v2/agentcanvas',
             element: (
                 <RequireAuth permission={'agentflows:view'}>
-                    <CanvasV2 />
+                    <DiagramAgentView />
                 </RequireAuth>
             )
         },
@@ -61,7 +62,23 @@ const CanvasRoutes = {
             path: '/v2/agentcanvas/:id',
             element: (
                 <RequireAuth permission={'agentflows:view'}>
-                    <CanvasV2 />
+                    <DiagramAgentView />
+                </RequireAuth>
+            )
+        },
+        {
+            path: '/diagram',
+            element: (
+                <RequireAuth permission={'chatflows:view'}>
+                    <DiagramView />
+                </RequireAuth>
+            )
+        },
+        {
+            path: '/diagram/:id',
+            element: (
+                <RequireAuth permission={'chatflows:view'}>
+                    <DiagramView />
                 </RequireAuth>
             )
         },

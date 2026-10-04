@@ -30,6 +30,7 @@ module.exports = {
     Unique: decorator,
     DataSource: jest.fn(),
     In: findOperator('in'),
+    Equal: findOperator('equal'),
     Between: findOperator('between'),
     MoreThanOrEqual: findOperator('moreThanOrEqual'),
     LessThanOrEqual: findOperator('lessThanOrEqual')

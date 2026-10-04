@@ -70,6 +70,7 @@ import { FLOWISE_METRIC_COUNTERS, FLOWISE_COUNTER_STATUS, IMetricsProvider } fro
 import { getWorkspaceSearchOptions } from '../enterprise/utils/ControllerServiceUtils'
 import { OMIT_QUEUE_JOB_DATA } from './constants'
 import { executeAgentFlow } from './buildAgentflow'
+import { assertDiagramPredictionAllowed, agentExecutorFlowData, isAgentDiagram } from './diagramExecution'
 import { Workspace } from '../enterprise/database/entities/workspace.entity'
 import { Organization } from '../enterprise/database/entities/organization.entity'
 
@@ -478,12 +479,15 @@ export const executeFlow = async ({
         }
     }
 
-    const isAgentFlowV2 = chatflow.type === 'AGENTFLOW'
+    const projectedFlowData = agentExecutorFlowData(chatflow.flowData)
+    const usesAgentBlob = projectedFlowData !== (chatflow.flowData || '')
+    const isAgentFlowV2 = chatflow.type === 'AGENTFLOW' || isAgentDiagram(chatflow)
     if (isAgentFlowV2) {
+        const executorChatflow = usesAgentBlob ? { ...chatflow, flowData: projectedFlowData } : chatflow
         return executeAgentFlow({
             componentNodes,
             incomingInput,
-            chatflow,
+            chatflow: executorChatflow,
             chatId,
             evaluationRunId,
             appDataSource,
@@ -999,6 +1003,10 @@ export const utilBuildChatflow = async (req: Request, isInternal: boolean = fals
     if (!chatflow) {
         throw new InternalFlowiseError(StatusCodes.NOT_FOUND, `Chatflow ${chatflowid} not found`)
     }
+
+    // Picture-family DIAGRAM documents never reach the component executor.
+    // family "agent" is allowed through; wiring it to the executor is a later slice.
+    assertDiagramPredictionAllowed(chatflow)
 
     const isAgentFlow = chatflow.type === 'MULTIAGENT'
     const httpProtocol = req.get('x-forwarded-proto') || req.protocol
