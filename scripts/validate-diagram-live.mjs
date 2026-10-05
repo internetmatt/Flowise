@@ -3,6 +3,7 @@
 import assert from 'node:assert/strict'
 import { createRequire } from 'node:module'
 import { resolve } from 'node:path'
+import { mkdir } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 
 const require = createRequire(import.meta.url)
@@ -10,6 +11,7 @@ const root = fileURLToPath(new URL('..', import.meta.url))
 const { chromium } = require(process.env.IDEAFLOW_PLAYWRIGHT_MODULE ||
     require.resolve('playwright', { paths: [resolve(root, 'packages/components')] }))
 const origin = (process.env.IDEAFLOW_URL || 'http://127.0.0.1:3000').replace(/\/$/, '')
+const variant = process.env.IDEAFLOW_STUDIO_VARIANT === 'internetmatt'
 const headers = { 'x-request-from': 'internal' }
 const browser = await chromium.launch({
     headless: true,
@@ -18,14 +20,22 @@ const browser = await chromium.launch({
 })
 const context = await browser.newContext({
     storageState: process.env.IDEAFLOW_STORAGE_STATE || undefined,
+    colorScheme: 'light',
     viewport: { width: 1440, height: 1000 }
 })
+const captureDir = process.env.IDEAFLOW_CAPTURE_DIR
+let captureIndex = 0
+async function capture(label) {
+    if (!captureDir) return
+    await mkdir(captureDir, { recursive: true })
+    await page.screenshot({ path: resolve(captureDir, `${String(++captureIndex).padStart(2, '0')}-${label}.png`) })
+}
 const page = await context.newPage()
 page.on('pageerror', (error) => console.error('Browser script error:', error.message))
 
 const ids = []
 const dsl = 'flowchart TD\n  A[Persisted start] --> B[Persisted end]'
-const name = `Diagram regression ${Date.now()}`
+const name = `${captureDir ? 'IdeaFlow save and reload' : `Diagram regression ${Date.now()}`}`
 
 async function record(id) {
     const response = await context.request.get(`${origin}/api/v1/chatflows/${id}`, { headers })
@@ -57,11 +67,39 @@ try {
     const id = new URL(page.url()).pathname.split('/').pop()
     ids.push(id)
     await rename('Diagram name', name)
+    if (variant) await page.getByLabel('Canvas variant', { exact: true }).selectOption('internetmatt')
+    await capture('diagram-created')
     await page.getByLabel('DSL').fill(dsl)
-    await page.waitForFunction(() => document.querySelectorAll('.react-flow__node').length === 2)
-    await page.locator('.react-flow__controls-zoomin').click()
-    await page.waitForFunction(() => document.querySelector('.react-flow__viewport')?.getAttribute('style')?.includes('scale(1.2)'))
+    await page.waitForFunction(() => document.querySelectorAll('pf-flow pf-node, .react-flow__node').length === 2)
+    if (variant) await page.locator('pf-controls').getByRole('button', { name: 'Fit view', exact: true }).click()
+    else await page.locator('.react-flow__controls-fitview').click()
+    await capture('diagram-edited')
+    if (variant) {
+        const node = page.locator('pf-node').first()
+        const box = await node.boundingBox()
+        assert.ok(box)
+        const originalPosition = await node.evaluate(el => el.style.transform)
+        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+        await page.mouse.down()
+        await page.mouse.move(box.x + box.width / 2 + 60, box.y + box.height / 2 + 30, { steps: 5 })
+        await page.mouse.up()
+        assert.notEqual(await node.evaluate(el => el.style.transform), originalPosition)
+        await page.getByLabel('DSL').press('End')
+        await page.getByLabel('DSL').press('Backspace')
+        assert.equal(await page.locator('pf-node').count(), 2)
+        await page.getByLabel('DSL').fill(dsl)
+        await page.waitForTimeout(600)
+        await page.locator('pf-controls').getByRole('button', { name: 'Zoom in', exact: true }).click()
+    } else {
+        await page.locator('.react-flow__controls-zoomout').click()
+        await page.locator('.react-flow__controls-zoomin').click()
+    }
+    await page.waitForFunction(() => {
+        const style = document.querySelector('.pf-flow__viewport, .react-flow__viewport')?.getAttribute('style') || ''
+        return Number(style.match(/scale\(([^)]+)\)/)?.[1]) > 1
+    })
     await save()
+    await capture('diagram-saved')
     const before = await record(id)
     const graph = JSON.parse(before.flowData)
     assert.equal(before.name, name)
@@ -77,8 +115,19 @@ try {
     await page.getByLabel('DSL').waitFor()
     assert.equal(await page.getByLabel('Diagram name', { exact: true }).inputValue(), name)
     assert.equal(await page.getByLabel('DSL').inputValue(), dsl)
-    await page.waitForFunction(() => document.querySelectorAll('.react-flow__node').length === 2)
+    await page.waitForFunction(() => document.querySelectorAll('pf-flow pf-node, .react-flow__node').length === 2)
     assert.equal((await record(id)).flowData, before.flowData)
+    await capture('diagram-reloaded')
+    if (variant) {
+        assert.equal(await page.getByLabel('Canvas variant', { exact: true }).inputValue(), 'internetmatt')
+        await page.getByRole('button', { name: 'Dark theme', exact: true }).click()
+        await capture('diagram-dark')
+        await page.getByRole('button', { name: 'Light theme', exact: true }).click()
+        await page.getByLabel('Canvas variant', { exact: true }).selectOption('reactflow')
+        await page.locator('.react-flow__node').first().waitFor()
+        assert.equal((await record(id)).flowData, before.flowData)
+        console.info('PASS Internet Matt variant: drag, text-input shortcuts, themes, reload and renderer fallback')
+    }
     console.info('PASS /diagram/:id: name, DSL, nodes, edges and changed viewport survive production save/reload')
 
     await page.goto(`${origin}/v2/agentcanvas`)
@@ -87,12 +136,14 @@ try {
     ids.push(agentId)
     await rename('Agent name', `${name} agent`)
     await save()
+    await capture('agent-studio')
     const agent = await record(agentId)
     assert.equal(agent.type, 'AGENTFLOW')
     assert.equal(JSON.parse(agent.flowData).family, 'agent')
     await page.getByRole('link', { name: 'Agents', exact: true }).click()
     await page.waitForURL(/\/agentflows$/)
     await page.getByText(`${name} agent`, { exact: true }).first().waitFor()
+    await capture('agents-list')
     const listing = await context.request.get(`${origin}/api/v1/chatflows?type=AGENTFLOW`, { headers })
     const rows = await listing.json()
     assert.ok((Array.isArray(rows) ? rows : rows.data).some((row) => row.id === agentId))

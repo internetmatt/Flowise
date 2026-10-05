@@ -1,0 +1,184 @@
+/* @internetmatt/flow-canvas — tokenized chrome (falls back if design-tokens absent) */
+
+pf-flow {
+  --pf-bg: var(--colors-background-default, #f5f5f5);
+  --pf-surface: var(--colors-background-surface, #fafafa);
+  --pf-border: var(--colors-border-default, #c8c8c8);
+  --pf-text: var(--colors-neutral-primary, #333333);
+  --pf-text-muted: var(--colors-neutral-secondary, #666666);
+  --pf-primary: var(--colors-primary-default, var(--color-primary, #0078d4));
+  --pf-node-bg: var(--colors-background-light, #ffffff);
+  --pf-node-border: var(--colors-border-default, #c8c8c8);
+  --pf-node-selected: var(--colors-border-focus, var(--color-primary, #0078d4));
+  --pf-handle: var(--colors-primary-default, var(--color-primary, #0078d4));
+  --pf-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --pf-font: var(--typography-font-family-base, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
+  --pf-radius: var(--radii-medium, 6px);
+
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 320px;
+  overflow: hidden;
+  background: var(--pf-bg);
+  color: var(--pf-text);
+  font-family: var(--pf-font);
+  touch-action: none;
+  user-select: none;
+}
+
+pf-flow[data-theme='dark'] {
+  --pf-bg: var(--colors-background-dark, #1f1f1f);
+  --pf-surface: #2a2a2a;
+  --pf-border: #444;
+  --pf-text: #f0f0f0;
+  --pf-text-muted: #aaa;
+  --pf-node-bg: #2a2a2a;
+  --pf-node-border: #555;
+}
+
+pf-node {
+  display: block;
+  position: absolute;
+  box-sizing: border-box;
+  min-width: 140px;
+  background: var(--pf-node-bg, #fff);
+  border: 1px solid var(--pf-node-border, #c8c8c8);
+  border-radius: var(--pf-radius, 6px);
+  box-shadow: var(--pf-shadow);
+  color: var(--pf-text, #333);
+  font-family: var(--pf-font, system-ui, sans-serif);
+  font-size: 13px;
+  line-height: 1.3;
+  cursor: grab;
+}
+
+pf-node[selected] {
+  border-color: var(--pf-node-selected, var(--color-primary, #0078d4));
+  box-shadow: 0 0 0 1px var(--pf-node-selected, var(--color-primary, #0078d4)), var(--pf-shadow);
+}
+
+/* S2 live run pulse — set by PfNode.setRunPulse / PfFlow.pulseNode
+   (do not animate transform — applyModel uses transform for layout) */
+pf-node[data-pulse] {
+  animation: pf-node-ring 0.9s ease-out 1;
+}
+pf-node[data-run-state='running'] {
+  border-color: var(--pf-primary, #0078d4);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--pf-primary, #0078d4) 55%, transparent),
+    0 0 18px color-mix(in srgb, var(--pf-primary, #0078d4) 40%, transparent);
+}
+pf-node[data-run-state='success'] {
+  border-color: #107c10;
+  box-shadow: 0 0 0 2px rgba(16, 124, 16, 0.45);
+}
+pf-node[data-run-state='error'] {
+  border-color: #a4262c;
+  box-shadow: 0 0 0 2px rgba(164, 38, 44, 0.45);
+}
+pf-node[data-run-state='queued'],
+pf-node[data-run-state='waiting'] {
+  border-color: #ca5010;
+}
+@keyframes pf-node-ring {
+  0% {
+    filter: brightness(1);
+  }
+  40% {
+    filter: brightness(1.12);
+  }
+  100% {
+    filter: brightness(1);
+  }
+}
+
+pf-node[data-type='input'] {
+  border-left: 3px solid var(--pf-primary, var(--color-primary, #0078d4));
+}
+
+pf-node[data-type='output'] {
+  border-right: 3px solid var(--colors-accent-default, #7fba00);
+}
+
+pf-handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--pf-handle, var(--color-primary, #0078d4));
+  border: 2px solid var(--pf-node-bg, #fff);
+  box-sizing: border-box;
+  cursor: crosshair;
+  z-index: 2;
+}
+
+pf-handle[data-position='left'] {
+  left: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+pf-handle[data-position='right'] {
+  right: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+pf-handle[data-position='top'] {
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+pf-handle[data-position='bottom'] {
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+pf-controls {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 5;
+}
+
+pf-controls button {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--pf-border, #c8c8c8);
+  border-radius: var(--pf-radius, 6px);
+  background: var(--pf-node-bg, #fff);
+  color: var(--pf-text, #333);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+pf-controls button:hover {
+  border-color: var(--pf-primary, var(--color-primary, #0078d4));
+  color: var(--pf-primary, var(--color-primary, #0078d4));
+}
+
+pf-minimap {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  width: 160px;
+  height: 100px;
+  border: 1px solid var(--pf-border, #c8c8c8);
+  border-radius: var(--pf-radius, 6px);
+  background: var(--pf-surface, #fafafa);
+  overflow: hidden;
+  z-index: 5;
+}
+
+pf-minimap canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}

@@ -26,6 +26,7 @@ import { AGENT_PALETTE } from '../families/agent'
 import { readDirection, type FlowDirection } from '../mermaid/flowchart'
 import { serializeDocument, type DiagramEdge, type DiagramNode } from '../schema'
 import { createStudioStore } from './store'
+import { InternetMattCanvas } from './InternetMattCanvas'
 
 const DirectionContext = createContext<FlowDirection>('TD')
 
@@ -101,6 +102,11 @@ export function DiagramStudio({
 
     const [nodes, setNodes] = useState<DiagramNode[]>(document.nodes)
     const [edges, setEdges] = useState<DiagramEdge[]>(document.edges)
+    const [renderer, setRenderer] = useState<'reactflow' | 'internetmatt'>(() =>
+        new URLSearchParams(window.location.search).get('studio') === 'internetmatt' ? 'internetmatt' : 'reactflow'
+    )
+    const [theme, setTheme] = useState<'light' | 'dark'>('light')
+    const internetMatt = renderer === 'internetmatt' && document.family === 'flowchart'
     const [saving, setSaving] = useState(false)
     const [saveNote, setSaveNote] = useState('')
     const [collabOn, setCollabOn] = useState(false)
@@ -247,9 +253,34 @@ export function DiagramStudio({
 
     return (
         <DirectionContext.Provider value={direction}>
-            <div className='ideaflow-studio'>
+            <div className={`ideaflow-studio${internetMatt ? ' is-internetmatt' : ''}`} data-theme={internetMatt ? theme : undefined}>
                 <header className='ideaflow-toolbar'>
                     <strong>{family.label}</strong>
+                    {document.family === 'flowchart' ? (
+                        <label>
+                            Canvas{' '}
+                            <select
+                                aria-label='Canvas variant'
+                                value={renderer}
+                                onChange={(event) => {
+                                    const next = event.target.value as 'reactflow' | 'internetmatt'
+                                    setRenderer(next)
+                                    const url = new URL(window.location.href)
+                                    if (next === 'internetmatt') url.searchParams.set('studio', next)
+                                    else url.searchParams.delete('studio')
+                                    window.history.replaceState(window.history.state, '', url)
+                                }}
+                            >
+                                <option value='reactflow'>IdeaFlow</option>
+                                <option value='internetmatt'>Internet Matt (experimental)</option>
+                            </select>
+                        </label>
+                    ) : null}
+                    {internetMatt ? (
+                        <button type='button' onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
+                            {theme === 'light' ? 'Dark theme' : 'Light theme'}
+                        </button>
+                    ) : null}
                     <button type='button' onClick={() => void actions.addNode()} disabled={busy || !canEdit}>
                         Add node
                     </button>
@@ -288,7 +319,25 @@ export function DiagramStudio({
                     {collabNote ? <span className='ideaflow-note'>{collabNote}</span> : null}
                 </header>
                 <div className='ideaflow-body'>
-                    {canEdit ? (
+                    {internetMatt ? (
+                        <InternetMattCanvas
+                            nodes={document.nodes}
+                            edges={document.edges}
+                            viewport={document.viewport}
+                            theme={theme}
+                            onSelection={(ids) => setNodes((current) => current.map((node) => ({ ...node, selected: ids.has(node.id) })))}
+                            onCommit={(nextNodes, nextEdges, nextViewport) => {
+                                const current = useStudio.getState().document
+                                if (
+                                    JSON.stringify(nextNodes.map(({ selected: _selected, ...node }) => node)) !==
+                                        JSON.stringify(current.nodes) ||
+                                    JSON.stringify(nextEdges) !== JSON.stringify(current.edges)
+                                )
+                                    actions.commitCanvas(nextNodes, nextEdges)
+                                if (JSON.stringify(nextViewport) !== JSON.stringify(current.viewport)) actions.setViewport(nextViewport)
+                            }}
+                        />
+                    ) : canEdit ? (
                         <ReactFlow
                             nodes={flowNodes}
                             edges={edges}
