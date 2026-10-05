@@ -120,3 +120,6 @@ apps/*/
 .claude/settings.local.json
 .claude/agent-memory/*
 
+
+# Local inference acceptance evidence
+/artifacts/host-inference-acceptance.json
