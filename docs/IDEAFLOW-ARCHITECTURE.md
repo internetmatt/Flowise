@@ -15,18 +15,18 @@ IdeaFlow is not the former Ideas/AIONUI application. No AIONUI runtime or sessio
 
 | System | Owns | Does not own |
 | --- | --- | --- |
-| Projecto | Tenant provisioning, owner identity, workspace/site assignment, entitlements, inference access | IdeaFlow UI, flows, conversations, membership administration |
+| Host platform (Projecto today) | Tenant provisioning, owner identity, workspace/site assignment, entitlements, inference access | IdeaFlow UI, flows, conversations, membership administration |
 | IdeaFlow | Tenant workspace, AI BizOps, ideas/conversations, employees and teammates, invites, roles, chatflow and agentflow associations, approvals, audit history | Global identity, billing entitlements, model infrastructure |
 | Flowise engine | Chatflow and agentflow definitions and execution primitives behind IdeaFlow | Product identity, tenancy policy, user-facing navigation |
 | DeerFlow UI | IdeaFlow web experience, adapted to `@internetmatt/design-tokens` | Provisioning or inference infrastructure |
 | Iggy desktop shell | Dedicated IdeaFlow desktop packaging, local launch, secure session handoff, deep links | Projecto Desktop or the former Ideas desktop |
 | `@internetmatt/design-tokens` | Shared visual tokens used by the IdeaFlow experience | Runtime behavior |
 
-Projecto and IdeaFlow integrate through explicit APIs and signed claims. They must not share application databases.
+IdeaFlow integrates with a host platform through the vendor-neutral [host platform contract](./HOST-PLATFORM-CONTRACT.md). Projecto is the current first-party implementation, not part of IdeaFlow's domain model. The systems integrate through explicit APIs and signed claims and must not share application databases.
 
 ## Tenancy model
 
-- One entitled owner account receives one Projecto-provisioned IdeaFlow instance.
+- One entitled owner account receives one host-provisioned IdeaFlow instance.
 - Each instance has an immutable `tenant_id` and `ideaflow_instance_id`.
 - The owner can create AI BizOps and invite employees or teammates into that instance.
 - An invited user is represented by a tenant-scoped membership and role.
@@ -44,9 +44,9 @@ Initial tenant roles:
 | Member | Participate in assigned ideas and conversations |
 | Viewer | Read-only access to permitted workspace content |
 
-## Projecto provisioning contract
+## Host platform provisioning contract
 
-Projecto provisions an instance using a server-to-server request. Configuration contains identifiers and service locations, never long-lived user or provider secrets.
+A host platform provisions an instance using a server-to-server request. Configuration contains identifiers, declared capabilities, and service locations, never long-lived user or provider secrets. Projecto currently implements this contract.
 
 ```json
 {
@@ -65,9 +65,9 @@ Projecto provisions an instance using a server-to-server request. Configuration 
 
 Required behavior:
 
-1. Projecto creates or reconciles the tenant and instance idempotently.
+1. The host creates or reconciles the tenant and instance idempotently.
 2. IdeaFlow binds the owner membership to `owner_subject`.
-3. Projecto issues short-lived, audience-restricted credentials or exposes a token exchange endpoint.
+3. The host issues short-lived, audience-restricted credentials or exposes a token exchange endpoint.
 4. IdeaFlow reports readiness and its canonical `site_origin`.
 5. Both systems log the provisioning correlation ID.
 
@@ -75,7 +75,7 @@ The contract should be versioned before fields become production dependencies. U
 
 ## Identity and inference boundary
 
-IdeaFlow accepts Projecto-issued identity tokens with at least:
+IdeaFlow accepts host-issued identity tokens with at least:
 
 ```json
 {
@@ -90,7 +90,7 @@ IdeaFlow accepts Projecto-issued identity tokens with at least:
 
 IdeaFlow validates issuer, audience, signature, expiry, instance, tenant, and server-side membership. Browser claims alone never grant access.
 
-Inference goes through the Projecto gateway using short-lived tenant-scoped credentials. The gateway enforces entitlement, model policy, rate limits, and usage attribution. IdeaFlow stores model references and execution metadata, but not provider credentials. An OpenAI-compatible surface is preferred where it does not hide required tenant or audit semantics.
+Inference goes through the configured host inference capability using short-lived tenant-scoped credentials. The host enforces entitlement, model policy, rate limits, and usage attribution. IdeaFlow stores model references and execution metadata, but not provider credentials. An OpenAI-compatible surface is preferred where it does not hide required tenant or audit semantics.
 
 ## Idea and flow model
 
@@ -126,9 +126,9 @@ Desktop requirements:
 - Use the system browser for authentication and return through the `ideaflow://` deep link.
 - Store refresh material only in the operating system credential store.
 - Restrict navigation and IPC to allowlisted origins and messages.
-- Never package provider keys or Projecto service credentials.
+- Never package provider keys or host service credentials.
 - Support macOS first through the Iggy-derived build; add Windows packaging from the same application contract.
-- Load the tenant's Projecto-assigned `site_origin`, not a hard-coded environment.
+- Load the tenant's host-assigned `site_origin`, not a hard-coded environment.
 
 ## Compatibility during transition
 
@@ -141,7 +141,7 @@ Desktop requirements:
 ## Delivery sequence
 
 1. Establish this contract and the IdeaFlow product identity.
-2. Introduce versioned Projecto provisioning, token exchange, and readiness endpoints.
+2. Introduce the versioned host-platform provisioning, token exchange, and readiness endpoints; implement Projecto as the first adapter.
 3. Adapt the DeerFlow UI to the design-token package and bind tenant navigation.
 4. Add Idea, chatflow, assistant, agentflow, membership, approval, and audit schemas.
 5. Add Driver.js walkthrough metadata and execution views.
@@ -153,10 +153,10 @@ Desktop requirements:
 
 The foundation is ready for implementation when:
 
-- A Projecto test owner can idempotently provision exactly one IdeaFlow instance.
+- A host-provisioned test owner can idempotently provision exactly one IdeaFlow instance.
 - The owner can invite a teammate whose access is enforced by tenant-scoped server checks.
 - An idea can attach and run a versioned chatflow; an assistant can attach and run a versioned agentflow.
-- Executions use Projecto inference without exposing provider credentials.
+- Executions use host-provided inference without exposing provider credentials.
 - A Driver.js walkthrough can animate a flow without mutating it.
 - The Iggy-derived desktop shell authenticates, resolves the assigned site, and opens the same tenant workspace as the web app.
 - Cross-tenant reads, writes, executions, and desktop handoffs are covered by negative tests.
