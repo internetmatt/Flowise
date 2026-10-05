@@ -4,6 +4,7 @@ import { tryApplyDsl } from '../document'
 import { pictureFamilies } from './index'
 
 const FIXTURES: Record<string, string> = {
+    schematic: `schematic\nSupply --> Load\n`,
     flowchart: `flowchart TD
   A[Start] --> B[End]
 `,

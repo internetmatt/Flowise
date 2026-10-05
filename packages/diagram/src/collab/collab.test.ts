@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { createCollabSession } from './session'
 import { createStubProviderPair } from './stubProvider'
+import type { CollabProvider, CollabUpdate } from './types'
 
 describe('diagram collab', () => {
     it('converges two peers on one dsl string through a stubbed provider', async () => {
@@ -23,5 +24,28 @@ describe('diagram collab', () => {
 
         peerA.destroy()
         peerB.destroy()
+    })
+    it('converges concurrent edits after delayed delivery without duplicating the saved seed', async () => {
+        const [a, b] = createStubProviderPair()
+        const pending: (() => void)[] = []
+        const delayed = (provider: CollabProvider): CollabProvider => ({
+            ...provider,
+            broadcast: (update: CollabUpdate) => pending.push(() => provider.broadcast(update))
+        })
+        const peerA = await createCollabSession('saved DSL', delayed(a))
+        const peerB = await createCollabSession('saved DSL', delayed(b))
+        try {
+            peerA.setDsl('edit A')
+            peerB.setDsl('edit B')
+            for (const deliver of pending.reverse()) deliver()
+            expect(peerA.getDsl()).toBe(peerB.getDsl())
+            expect(peerA.getDsl()).not.toContain('saved DSL')
+            // Duplicate delivery must be idempotent.
+            for (const deliver of pending) deliver()
+            expect(peerA.getDsl()).toBe(peerB.getDsl())
+        } finally {
+            peerA.destroy()
+            peerB.destroy()
+        }
     })
 })

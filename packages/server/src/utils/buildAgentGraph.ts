@@ -13,7 +13,7 @@ import {
     IServerSideEventStreamer
 } from 'flowise-components'
 import { omit, cloneDeep, flatten, uniq } from 'lodash'
-import { StateGraph, END, START } from '@langchain/langgraph'
+import { StateGraph, END, START, BaseChannel } from '@langchain/langgraph'
 import { Document } from '@langchain/core/documents'
 import { StatusCodes } from 'http-status-codes'
 import { v4 as uuidv4 } from 'uuid'
@@ -29,6 +29,12 @@ import { Variable } from '../database/entities/Variable'
 import { getWorkspaceSearchOptions } from '../enterprise/utils/ControllerServiceUtils'
 import { DataSource } from 'typeorm'
 import { CachePool } from '../CachePool'
+import { messageContentText } from './agentGraphTypes'
+
+// Component interfaces describe channel reducers; runtime state contains their values.
+type TeamGraphState = Omit<ITeamState, 'messages'> & { messages: BaseMessage[] }
+type SequentialGraphState = Record<string, any> & { messages: BaseMessage[] }
+type GraphChannels<S> = { [K in keyof S]-?: BaseChannel<S[K], S[K]> }
 
 /**
  * Build Agent Graph
@@ -106,7 +112,7 @@ export const buildAgentGraph = async ({
         let lastWorkerResult = ''
         let agentReasoning: IAgentReasoning[] = []
         let isSequential = false
-        let lastMessageRaw = {} as AIMessageChunk
+        let lastMessageRaw: AIMessage | AIMessageChunk | undefined
         let finalAction: IAction = {}
         let totalSourceDocuments: IDocument[] = []
         let totalUsedTools: IUsedTool[] = []
@@ -173,39 +179,48 @@ export const buildAgentGraph = async ({
                         for (const agentName of Object.keys(output)) {
                             if (!mapNameToLabel[agentName]) continue
 
-                            const nodeId = output[agentName]?.messages
+                            const nodeIdValue = output[agentName]?.messages
                                 ? output[agentName].messages[output[agentName].messages.length - 1]?.additional_kwargs?.nodeId
                                 : ''
+                            const nodeId = typeof nodeIdValue === 'string' ? nodeIdValue : ''
                             const usedTools = output[agentName]?.messages
-                                ? output[agentName].messages.map((msg: BaseMessage) => msg.additional_kwargs?.usedTools)
+                                ? output[agentName].messages.map(
+                                      (msg: BaseMessage) => msg.additional_kwargs?.usedTools as IUsedTool[] | undefined
+                                  )
                                 : []
                             const sourceDocuments = output[agentName]?.messages
-                                ? output[agentName].messages.map((msg: BaseMessage) => msg.additional_kwargs?.sourceDocuments)
+                                ? output[agentName].messages.map(
+                                      (msg: BaseMessage) => msg.additional_kwargs?.sourceDocuments as IDocument[] | undefined
+                                  )
                                 : []
                             const artifacts = output[agentName]?.messages
-                                ? output[agentName].messages.map((msg: BaseMessage) => msg.additional_kwargs?.artifacts)
+                                ? output[agentName].messages.map(
+                                      (msg: BaseMessage) => msg.additional_kwargs?.artifacts as ICommonObject[] | undefined
+                                  )
                                 : []
                             const messages = output[agentName]?.messages
-                                ? output[agentName].messages.map((msg: BaseMessage) => (typeof msg === 'string' ? msg : msg.content))
+                                ? output[agentName].messages.map((msg: BaseMessage) => messageContentText(msg.content))
                                 : []
-                            lastMessageRaw = output[agentName]?.messages
-                                ? output[agentName].messages[output[agentName].messages.length - 1]
-                                : {}
+                            const lastMessage = output[agentName]?.messages?.at(-1)
+                            lastMessageRaw =
+                                lastMessage instanceof AIMessage || lastMessage instanceof AIMessageChunk ? lastMessage : undefined
 
                             const state = omit(output[agentName], ['messages'])
 
                             if (usedTools && usedTools.length) {
-                                const cleanedTools = usedTools.filter((tool: IUsedTool) => tool)
+                                const cleanedTools = flatten(usedTools).filter((tool): tool is IUsedTool => Boolean(tool))
                                 if (cleanedTools.length) totalUsedTools.push(...cleanedTools)
                             }
 
                             if (sourceDocuments && sourceDocuments.length) {
-                                const cleanedDocs = sourceDocuments.filter((documents: IDocument) => documents)
+                                const cleanedDocs = flatten(sourceDocuments).filter((document): document is IDocument => Boolean(document))
                                 if (cleanedDocs.length) totalSourceDocuments.push(...cleanedDocs)
                             }
 
                             if (artifacts && artifacts.length) {
-                                const cleanedArtifacts = artifacts.filter((artifact: ICommonObject) => artifact)
+                                const cleanedArtifacts = flatten(artifacts).filter((artifact): artifact is ICommonObject =>
+                                    Boolean(artifact)
+                                )
                                 if (cleanedArtifacts.length) totalArtifacts.push(...cleanedArtifacts)
                             }
 
@@ -254,7 +269,7 @@ export const buildAgentGraph = async ({
                             lastWorkerResult =
                                 output[agentName]?.messages?.length &&
                                 output[agentName].messages[output[agentName].messages.length - 1]?.additional_kwargs?.type === 'worker'
-                                    ? output[agentName].messages[output[agentName].messages.length - 1].content
+                                    ? messageContentText(output[agentName].messages[output[agentName].messages.length - 1].content)
                                     : lastWorkerResult
 
                             if (shouldStreamResponse) {
@@ -278,8 +293,8 @@ export const buildAgentGraph = async ({
                             }
                         }
                     } else {
-                        finalResult = output.__end__.messages.length ? output.__end__.messages.pop()?.content : ''
-                        if (Array.isArray(finalResult)) finalResult = output.__end__.instructions
+                        const finalContent = output.__end__.messages?.at(-1)?.content
+                        finalResult = Array.isArray(finalContent) ? output.__end__.instructions ?? '' : finalContent ?? ''
                         if (shouldStreamResponse && sseStreamer) {
                             sseStreamer.streamTokenEvent(chatId, finalResult)
                         }
@@ -307,20 +322,21 @@ export const buildAgentGraph = async ({
                     const lastMessages = agentReasoning[agentReasoning.length - 1].messages
                     const lastAgentReasoningMessage = lastMessages[lastMessages.length - 1]
                     // If last message is an AI Message with tool calls, that means the last node was interrupted
-                    if (lastMessageRaw.tool_calls && lastMessageRaw.tool_calls.length > 0) {
+                    const interruptedMessage = lastMessageRaw
+                    if (interruptedMessage?.tool_calls && interruptedMessage.tool_calls.length > 0) {
                         // The last node that got interrupted
-                        const node = initializedNodes.find((node) => node.id === lastMessageRaw.additional_kwargs.nodeId)
+                        const node = initializedNodes.find((node) => node.id === interruptedMessage.additional_kwargs.nodeId)
 
                         // Find the next tool node that is connected to the interrupted node, to get the approve/reject button text
                         const tooNodeId = edges.find(
                             (edge) =>
                                 edge.target.includes('seqToolNode') &&
-                                edge.source === (lastMessageRaw.additional_kwargs && lastMessageRaw.additional_kwargs.nodeId)
+                                edge.source === (interruptedMessage.additional_kwargs && interruptedMessage.additional_kwargs.nodeId)
                         )?.target
                         const connectedToolNode = initializedNodes.find((node) => node.id === tooNodeId)
 
                         // Map raw tool calls to used tools, to be shown on interrupted message
-                        const mappedToolCalls = lastMessageRaw.tool_calls.map((toolCall) => {
+                        const mappedToolCalls = interruptedMessage.tool_calls.map((toolCall) => {
                             return {
                                 tool: toolCall.name,
                                 toolInput: toolCall.args,
@@ -349,7 +365,7 @@ export const buildAgentGraph = async ({
                                 mapping: {
                                     approve: approveButtonText,
                                     reject: rejectButtonText,
-                                    toolCalls: lastMessageRaw.tool_calls
+                                    toolCalls: interruptedMessage.tool_calls
                                 },
                                 elements: [
                                     { type: 'approve-button', label: approveButtonText },
@@ -457,7 +473,14 @@ const compileMultiAgentsGraph = async (params: MultiAgentsGraphParams) => {
 
     if (summarization) channels.summarization = 'summarize'
 
-    const workflowGraph = new StateGraph<ITeamState>({
+    const workflowGraph = new StateGraph<
+        GraphChannels<TeamGraphState>,
+        TeamGraphState,
+        Partial<TeamGraphState>,
+        string,
+        GraphChannels<TeamGraphState>,
+        GraphChannels<TeamGraphState>
+    >({
         //@ts-ignore
         channels
     })
@@ -668,7 +691,14 @@ const compileSeqAgentsGraph = async (params: SeqAgentsGraphParams) => {
         }
     }
 
-    let seqGraph = new StateGraph<any>({
+    let seqGraph = new StateGraph<
+        GraphChannels<SequentialGraphState>,
+        SequentialGraphState,
+        Partial<SequentialGraphState>,
+        string,
+        GraphChannels<SequentialGraphState>,
+        GraphChannels<SequentialGraphState>
+    >({
         //@ts-ignore
         channels
     })
@@ -966,7 +996,7 @@ const compileSeqAgentsGraph = async (params: SeqAgentsGraphParams) => {
         const connectedToolNodes = conditionalToolNodes[llmSourceNodeId].toolNodes
         const sourceNode = conditionalToolNodes[llmSourceNodeId].source
 
-        const routeMessage = (state: ISeqAgentsState) => {
+        const routeMessage = (state: SequentialGraphState) => {
             const messages = state.messages as unknown as BaseMessage[]
             const lastMessage = messages[messages.length - 1] as AIMessage
 
