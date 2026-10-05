@@ -19,7 +19,16 @@ export async function createCollabSession(initialDsl: string, provider: CollabPr
 function createYjsSession(Y: typeof import('yjs'), initialDsl: string, provider: CollabProvider): CollabSession {
     const doc = new Y.Doc()
     const text = doc.getText('dsl')
-    if (initialDsl) text.insert(0, initialDsl)
+    // All peers opening the same persisted DSL must share the seed's CRDT identity.
+    // Independent inserts use different client IDs, so later edits cannot delete
+    // another peer's seed and may remain pending on unknown CRDT items.
+    if (initialDsl) {
+        const seed = new Y.Doc()
+        seed.clientID = 0
+        seed.getText('dsl').insert(0, initialDsl)
+        Y.applyUpdate(doc, Y.encodeStateAsUpdate(seed))
+        seed.destroy()
+    }
 
     const listeners = new Set<(dsl: string) => void>()
     const emit = () => {
