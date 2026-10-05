@@ -12,6 +12,7 @@ const Chatflows = Loadable(lazy(() => import('@/views/chatflows')))
 
 // agents routing
 const Agentflows = Loadable(lazy(() => import('@/views/agentflows')))
+const WorkflowManagement = Loadable(lazy(() => import('@/views/workflowmanagement')))
 const Diagrams = Loadable(lazy(() => import('@/views/diagrams')))
 
 // marketplaces routing
@@ -348,6 +349,10 @@ const MainRoutes = {
                     <SSOConfig />
                 </RequireAuth>
             )
+        },
+        {
+            path: '/workflow-management',
+            element: <RequireAuth permission={'agentflows:view'}><WorkflowManagement /></RequireAuth>
         },
         {
             path: '/sso-success',
