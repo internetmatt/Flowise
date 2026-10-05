@@ -35,3 +35,7 @@ See the [host platform contract](./HOST-PLATFORM-CONTRACT.md) and [headless harn
 ## Next implementation slice
 
 Add a graph-to-skill binding and export path for one existing agentflow, with a pinned revision and declared input/output schemas. Test preservation of node payloads, edge handles and credential references; reject missing executors or undeclared capabilities. Then demonstrate an authorized end-to-end run of that exported skill with a durable result before marking visual skill publishing available.
+
+## Proposed decisions and handoff
+
+See the [ADR proposals](adr/README.md) and [catchup/implementation ownership](2026-10-04-catchup.md) for the headless/UI boundary and portable OpenIdea follow-up.
