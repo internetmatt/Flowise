@@ -64,14 +64,14 @@ Save path: editor emits the v1 blob; the existing chatflow update writes `flowDa
 
 ## Generation
 
-The browser client inside `@openideas/diagram` calls the configured, workspace-authorized IdeaFlow API proxy at `/api/v1/diagram-inference/:id`. The server speaks the OpenAI chat-completions API on the Projecto inference gateway:
+The browser client inside `@openideas/diagram` calls the configured, workspace-authorized IdeaFlow API proxy at `/api/v1/diagram-inference/:id`. The server delegates through IdeaFlow's host inference adapter:
 
 -   `POST {base}/v1/chat/completions`
 -   `GET {base}/v1/models` for the model list
 -   Default base `http://127.0.0.1:4716/v1`
--   Only the IdeaFlow server reads `PROJECTO_OPERATOR_API_KEY` and `PROJECTO_INFERENCE_BASE`. It sends the operator bearer to Projecto, which retains token validation and model policy authority. Never put the key in Vite variables or `window.__PROJECTO_HOST_CONFIG__`. Browser requests use the existing authenticated IdeaFlow session, a workspace-owned diagram/agent ID, and record-type view/update permissions. The proxy exposes only model listing and bounded Mermaid generation, not arbitrary gateway operations.
+-   Only the IdeaFlow server reads `IDEAFLOW_HOST_INFERENCE_TOKEN` and `IDEAFLOW_HOST_INFERENCE_BASE`. Legacy `PROJECTO_*` variables are accepted only as server-side compatibility aliases. The configured host retains token validation and model-policy authority. Never put host credentials in Vite variables or browser globals. Browser requests use the existing authenticated IdeaFlow session, a workspace-owned diagram/agent ID, and record-type view/update permissions. The proxy exposes only model listing and bounded Mermaid generation, not arbitrary gateway operations.
 
-The gateway owns lanes (`projecto/*` local vLLM, `pinternet/*`, and the rest of its routing). The panel picks a model from `/v1/models`. It does not call Ollama, vLLM `:8000`, or a third-party provider directly.
+Model IDs and routing lanes are opaque host data (for example the current Projecto host may return `projecto/*` or `pinternet/*`). The panel picks a model from `/v1/models`. It does not call Ollama, vLLM `:8000`, or a third-party provider directly.
 
 The model returns DSL. The package parses it, lays it out, and writes nodes, edges, and `dsl` into the document. A parse failure is shown in the panel; the previous canvas is left in place. The operator key is not written to `chat_flow` or the IdeaFlow credentials store.
 
