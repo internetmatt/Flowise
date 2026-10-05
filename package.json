@@ -26,6 +26,7 @@
         "user:windows": "cd packages/server/bin && run user",
         "user:default": "cd packages/server/bin && ./run user",
         "test": "turbo run test",
+        "acceptance:host-inference": "node scripts/accept-host-inference.mjs",
         "test:coverage": "turbo run test:coverage",
         "clean": "pnpm -r clean",
         "nuke": "pnpm -r nuke && rimraf node_modules .turbo",
