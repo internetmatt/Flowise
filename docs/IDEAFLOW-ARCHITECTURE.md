@@ -5,7 +5,9 @@ Repository transition: `OpenIdeas` → `IdeaFlow`
 
 ## Product definition
 
-IdeaFlow is a tenant-owned AI BizOps workspace. It is where an owner and invited teammates capture ideas, turn them into executable workflows, collaborate with AI assistants, review work, and audit outcomes.
+**Make agent skills visually.** IdeaFlow is a tenant-owned workspace where an owner and invited teammates author executable graphs, shape them into reusable agent capabilities, collaborate with assistants, review work, and audit outcomes.
+
+The [visual agent skill contract](./VISUAL-AGENT-SKILLS.md) describes a skill's instructions, inputs, outputs, permissions, and pinned IdeaFlow graph implementation. Packaging and publishing are implementation follow-ups, not capabilities implied by the graph editor alone.
 
 An **idea** is a conversation session with an attached Flowise chatflow. Assistants may each have an associated Flowise agentflow. IdeaFlow can present guided, animated walkthroughs of either flow using Driver.js.
 
