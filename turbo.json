@@ -5,6 +5,10 @@
             "dependsOn": ["^build"],
             "outputs": ["dist/**"]
         },
+        "flowise-ui#build": {
+            "dependsOn": ["^build"],
+            "outputs": ["build/**"]
+        },
         "test": {},
         "test:coverage": {},
         "dev": {

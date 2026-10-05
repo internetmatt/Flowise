@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from 'express'
+import { checkAnyPermission } from '../../enterprise/rbac/PermissionCheck'
 import { ChatFlow } from '../../database/entities/ChatFlow'
 import { getRunningExpressApp } from '../../utils/getRunningExpressApp'
 
@@ -10,11 +11,16 @@ export const authorizeDiagramRoom = async (req: Request, res: Response, next: Ne
 
         const diagram = await getRunningExpressApp().AppDataSource.getRepository(ChatFlow).findOneBy({
             id: req.params.roomId,
-            workspaceId,
-            type: 'DIAGRAM'
+            workspaceId
         })
-        if (!diagram) return res.status(404).json({ message: 'Diagram not found' })
-        return next()
+        if (!diagram || !['DIAGRAM', 'AGENTFLOW'].includes(diagram.type || ''))
+            return res.status(404).json({ message: 'Diagram not found' })
+        const family = diagram.type === 'AGENTFLOW' ? 'agentflows' : 'chatflows'
+        const permissions =
+            req.method === 'POST' && /\/(signal|chat\/completions)\/?$/i.test(req.path)
+                ? `${family}:update`
+                : `${family}:view,${family}:update`
+        return checkAnyPermission(permissions)(req, res, next)
     } catch (error) {
         return next(error)
     }

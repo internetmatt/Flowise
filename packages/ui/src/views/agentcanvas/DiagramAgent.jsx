@@ -50,21 +50,13 @@ function asAgentBlob(flowData) {
     return EMPTY_AGENT_FLOW_DATA
 }
 
-function hostGateway() {
-    const host = window.__PROJECTO_HOST_CONFIG__ || {}
-    return {
-        baseUrl: import.meta.env.VITE_PROJECTO_INFERENCE_BASE || host.PROJECTO_INFERENCE_BASE || 'http://127.0.0.1:4716/v1',
-        apiKey: import.meta.env.VITE_PROJECTO_OPERATOR_API_KEY || host.PROJECTO_OPERATOR_API_KEY || ''
-    }
-}
-
 const DiagramAgentView = () => {
     const { id } = useParams()
     const navigate = useNavigate()
     const hostRef = useRef(null)
     const nameRef = useRef('Untitled agent')
     const flowRef = useRef(EMPTY_AGENT_FLOW_DATA)
-    const typeRef = useRef('DIAGRAM')
+    const typeRef = useRef('AGENTFLOW')
     const [name, setName] = useState('Untitled agent')
     const [status, setStatus] = useState('')
     const [error, setError] = useState('')
@@ -85,7 +77,7 @@ const DiagramAgentView = () => {
                                 name: 'Untitled agent',
                                 deployed: false,
                                 isPublic: false,
-                                type: 'DIAGRAM',
+                                type: 'AGENTFLOW',
                                 flowData: EMPTY_AGENT_FLOW_DATA
                             })
                             .finally(() => {
@@ -103,7 +95,7 @@ const DiagramAgentView = () => {
                     setError('This record is not an agent diagram.')
                     return
                 }
-                typeRef.current = chatflow.type === 'AGENTFLOW' ? 'AGENTFLOW' : 'DIAGRAM'
+                typeRef.current = chatflow.type === 'DIAGRAM' ? 'DIAGRAM' : 'AGENTFLOW'
                 nameRef.current = chatflow.name || 'Untitled agent'
                 flowRef.current = asAgentBlob(chatflow.flowData)
                 setName(nameRef.current)
@@ -140,7 +132,7 @@ const DiagramAgentView = () => {
                 handle = api.mount(element, {
                     flowData,
                     assetBase: diagramAssetBase(),
-                    gateway: hostGateway(),
+                    gateway: { baseUrl: `${baseURL}/api/v1/diagram-inference/${encodeURIComponent(id)}` },
                     signalingBase: `${baseURL}/api/v1/diagram-signaling`,
                     diagramId: id,
                     onChange: (next) => {

@@ -12,6 +12,7 @@ import componentsCredentialsIconRouter from './components-credentials-icon'
 import credentialsRouter from './credentials'
 import customMcpServersRouter from './custom-mcp-servers'
 import datasetRouter from './dataset'
+import diagramInferenceRouter from './diagram-inference'
 import diagramSignalingRouter from './diagram-signaling'
 import documentStoreRouter from './documentstore'
 import evaluationsRouter from './evaluations'
@@ -87,6 +88,7 @@ router.use('/components-credentials', componentsCredentialsRouter)
 router.use('/components-credentials-icon', componentsCredentialsIconRouter)
 router.use('/credentials', credentialsRouter)
 router.use('/datasets', IdentityManager.checkFeatureByPlan('feat:datasets'), datasetRouter)
+router.use('/diagram-inference', diagramInferenceRouter)
 router.use('/diagram-signaling', diagramSignalingRouter)
 router.use('/document-store', documentStoreRouter)
 router.use('/evaluations', IdentityManager.checkFeatureByPlan('feat:evaluations'), evaluationsRouter)

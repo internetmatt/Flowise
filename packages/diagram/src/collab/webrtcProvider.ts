@@ -24,7 +24,8 @@ export function createSignalingClient(options: SignalingClientOptions) {
     const join = async () => {
         const response = await fetchImpl(`${base}/${room}/join`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json', 'x-request-from': 'internal' },
             body: JSON.stringify({ peerId })
         })
         if (!response.ok) throw new Error(`Signaling join failed (${response.status})`)
@@ -34,7 +35,8 @@ export function createSignalingClient(options: SignalingClientOptions) {
     const postSignal = async (to: string, payload: unknown) => {
         await fetchImpl(`${base}/${room}/signal`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json', 'x-request-from': 'internal' },
             body: JSON.stringify({ from: peerId, to, payload })
         })
     }
@@ -42,7 +44,10 @@ export function createSignalingClient(options: SignalingClientOptions) {
     const poll = async () => {
         while (!stopped) {
             try {
-                const response = await fetchImpl(`${base}/${room}/poll?peerId=${encodeURIComponent(peerId)}`)
+                const response = await fetchImpl(`${base}/${room}/poll?peerId=${encodeURIComponent(peerId)}`, {
+                    credentials: 'include',
+                    headers: { 'x-request-from': 'internal' }
+                })
                 if (response.ok) {
                     const body = (await response.json()) as { messages?: SignalingMessage[] }
                     for (const message of body.messages ?? []) {
@@ -72,7 +77,8 @@ export function createSignalingClient(options: SignalingClientOptions) {
             try {
                 await fetchImpl(`${base}/${room}/leave`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json', 'x-request-from': 'internal' },
                     body: JSON.stringify({ peerId })
                 })
             } catch {

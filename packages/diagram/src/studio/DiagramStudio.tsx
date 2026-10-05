@@ -58,7 +58,7 @@ export function DiagramStudio({
     onChange
 }: {
     flowData: string
-    gateway?: { baseUrl?: string; apiKey?: string }
+    gateway?: { baseUrl?: string }
     assetBase?: string
     /** IdeaFlow signaling base, e.g. `/api/v1/diagram-signaling`. Collab stays off until started. */
     signalingBase?: string

@@ -112,7 +112,7 @@
         "dev": "vite",
         "start": "vite",
         "build": "vite build",
-        "test": "jest",
+        "test": "node --test scripts/stageDiagramAssets.test.mjs && jest",
         "clean": "rimraf build",
         "nuke": "pnpm clean && rimraf node_modules .turbo"
     },
@@ -156,6 +156,8 @@
         "typescript": "^5.4.5",
         "vite": "^5.0.2",
         "vite-plugin-pwa": "^0.17.0",
-        "vite-plugin-react-js-support": "^1.0.7"
+        "vite-plugin-react-js-support": "^1.0.7",
+        "@openideas/diagram": "workspace:*",
+        "@babel/preset-react": "7.25.9"
     }
 }

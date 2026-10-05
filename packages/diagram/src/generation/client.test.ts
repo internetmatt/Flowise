@@ -1,14 +1,28 @@
 import { describe, expect, it } from 'vitest'
-import { emptyFlowchartDocument, serializeDocument } from '../schema'
-import { DEFAULT_GATEWAY_BASE, generateDiagram, listModels } from './client'
+import { emptyFlowchartDocument } from '../schema'
+import { assertGatewayBase, generateDiagram, listModels, resolveGatewayConfig } from './client'
 
-const OPERATOR_KEY = 'operator-secret-not-on-document'
+const PROXY_BASE = '/api/v1/diagram-inference/diagram-1'
 
 function jsonResponse(body: unknown, status = 200): Response {
     return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
 }
 
 describe('inference gateway client', () => {
+    it('drops legacy credentials and refuses direct gateway or vendor URLs', () => {
+        expect(resolveGatewayConfig({ baseUrl: PROXY_BASE, apiKey: 'legacy-secret' } as any)).toEqual({ baseUrl: PROXY_BASE })
+        expect(() => assertGatewayBase(PROXY_BASE)).not.toThrow()
+        expect(() => assertGatewayBase(`http://localhost:3010${PROXY_BASE}`)).not.toThrow()
+        for (const base of [
+            'http://127.0.0.1:4716/v1',
+            'https://api.openai.com/v1',
+            '/api/v1/chatflows',
+            '//attacker.test/api/v1/diagram-inference/id'
+        ]) {
+            expect(() => assertGatewayBase(base)).toThrow()
+        }
+    })
+
     it('lists models and replaces the canvas from a stubbed completion', async () => {
         const calls: Array<{ url: string; init?: RequestInit }> = []
         const fetchImpl = async (url: string, init?: RequestInit) => {
@@ -18,7 +32,7 @@ describe('inference gateway client', () => {
                 choices: [{ message: { content: '```mermaid\nflowchart TD\n  A[Start] --> B[End]\n```' } }]
             })
         }
-        const gateway = { baseUrl: DEFAULT_GATEWAY_BASE, apiKey: OPERATOR_KEY }
+        const gateway = { baseUrl: PROXY_BASE }
         const models = await listModels(gateway, fetchImpl)
         expect(models).toEqual([{ id: 'projecto/local' }])
 
@@ -39,15 +53,16 @@ describe('inference gateway client', () => {
             fetchImpl
         })
 
-        expect(calls.map((call) => call.url)).toEqual(['http://127.0.0.1:4716/v1/models', 'http://127.0.0.1:4716/v1/chat/completions'])
+        expect(calls.map((call) => call.url)).toEqual([`${PROXY_BASE}/models`, `${PROXY_BASE}/chat/completions`])
         const completion = calls[1]
         expect(completion?.init?.method).toBe('POST')
-        expect(new Headers(completion?.init?.headers).get('Authorization')).toBe(`Bearer ${OPERATOR_KEY}`)
+        expect(new Headers(completion?.init?.headers).get('Authorization')).toBeNull()
         expect(result.error).toBeNull()
         expect(result.document.nodes.map((node) => node.id)).toEqual(['A', 'B'])
         expect(result.document.dsl).toContain('A[Start]')
         expect(result.document).not.toBe(previous)
-        expect(serializeDocument(result.document)).not.toContain(OPERATOR_KEY)
+        expect(completion.init?.credentials).toBe('include')
+        expect(new Headers(completion.init?.headers).get('x-request-from')).toBe('internal')
         expect(JSON.stringify(result.document)).not.toContain('apiKey')
     })
 
@@ -66,7 +81,7 @@ describe('inference gateway client', () => {
             current: previous,
             prompt: 'nope',
             model: 'projecto/local',
-            gateway: { baseUrl: DEFAULT_GATEWAY_BASE, apiKey: OPERATOR_KEY },
+            gateway: { baseUrl: PROXY_BASE },
             fetchImpl
         })
         expect(result.error).toMatch(/Could not parse flowchart DSL/)
