@@ -2,7 +2,17 @@
 
 # IdeaFlow
 
-IdeaFlow is a tenant-owned AI BizOps workspace for turning ideas into collaborative, executable AI operations.
+## Make agent skills visually
+
+Use IdeaFlow's graph editor to connect agents, models, tools, conditions, and reusable flows. The product direction is to turn those executable graphs into reusable agent skills: named capabilities with instructions, declared inputs and outputs, permissions, and a pinned graph revision.
+
+IdeaFlow owns the graph and its visual authoring experience. A host runtime can invoke the resulting skill headlessly and project its progress and artifacts into a UI. Chatflows support conversational capabilities; assistant agentflows coordinate multi-step work.
+
+**Current status:** graph editing, persistence, and the optional Internet Matt flowchart canvas exist. Graph-to-skill packaging, publishing, and the complete authenticated headless execution path still require implementation and live acceptance evidence. A picture diagram alone is not an executable skill.
+
+- [Visual graph → agent skill contract](docs/VISUAL-AGENT-SKILLS.md)
+
+IdeaFlow remains a tenant-owned workspace for collaborative AI operations.
 
 An idea is a conversation session with an attached chatflow. Assistants can have their own agentflows, and Driver.js walkthroughs can animate either flow. A host platform (Projecto today) provisions each owner's tenant, site, identity, and inference access; IdeaFlow owns the workspace, team, flows, conversations, approvals, and audit history.
 
