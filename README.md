@@ -4,7 +4,7 @@
 
 IdeaFlow is a tenant-owned AI BizOps workspace for turning ideas into collaborative, executable AI operations.
 
-An idea is a conversation session with an attached chatflow. Assistants can have their own agentflows, and Driver.js walkthroughs can animate either flow. Projecto provisions each owner's tenant, site, identity, and inference access; IdeaFlow owns the workspace, team, flows, conversations, approvals, and audit history.
+An idea is a conversation session with an attached chatflow. Assistants can have their own agentflows, and Driver.js walkthroughs can animate either flow. A host platform (Projecto today) provisions each owner's tenant, site, identity, and inference access; IdeaFlow owns the workspace, team, flows, conversations, approvals, and audit history.
 
 This repository is transitioning from **OpenIdeas/Ideus** to **IdeaFlow**. It retains the Flowise-derived execution engine while the product UI moves to the DeerFlow foundation with `@internetmatt/design-tokens`. The former Ideas/AIONUI application is not a runtime dependency.
 
@@ -16,28 +16,35 @@ This repository is transitioning from **OpenIdeas/Ideus** to **IdeaFlow**. It re
 
 ---
 
-<p align="center">
-<img src="https://github.com/FlowiseAI/Flowise/blob/main/images/flowise_white.svg#gh-light-mode-only">
-<img src="https://github.com/FlowiseAI/Flowise/blob/main/images/flowise_dark.svg#gh-dark-mode-only">
-</p>
+## IdeaFlow in use
 
-<div align="center">
+These images come from the production browser regression against a disposable local workspace, with real persistence and no mocked APIs. This experimental branch keeps the current studio and adds an optional Internet Matt canvas/token variant. Main is not replaced.
 
-[![Release Notes](https://img.shields.io/github/release/FlowiseAI/Flowise)](https://github.com/FlowiseAI/Flowise/releases)
-[![Discord](https://img.shields.io/discord/1087698854775881778?label=Discord&logo=discord)](https://discord.gg/jbaHfsRVBW)
-[![Twitter Follow](https://img.shields.io/twitter/follow/FlowiseAI?style=social)](https://twitter.com/FlowiseAI)
-[![GitHub star chart](https://img.shields.io/github/stars/FlowiseAI/Flowise?style=social)](https://star-history.com/#FlowiseAI/Flowise)
-[![GitHub fork](https://img.shields.io/github/forks/FlowiseAI/Flowise?style=social)](https://github.com/FlowiseAI/Flowise/fork)
+![IdeaFlow diagram after save and reload](images/ideaflow/diagram-studio.png)
 
-English | [繁體中文](./i18n/README-TW.md) | [简体中文](./i18n/README-ZH.md) | [日本語](./i18n/README-JA.md) | [한국어](./i18n/README-KR.md)
+### Experimental Internet Matt variant
 
-</div>
+Open a saved `/diagram/:id?studio=internetmatt`, or choose **Canvas → Internet Matt (experimental)**. Switch back to **IdeaFlow** in the same selector. The prototype supports flowcharts; agents and other diagram families retain the original renderer. It uses pinned shared-package source snapshots pending portable package publishing.
 
-<h2>Flowise has been archived. Refer to [Future of Flowise](https://github.com/FlowiseAI/Flowise/discussions/6727)</h2>
+![Internet Matt flow canvas with shared light tokens](images/ideaflow/internetmatt-light.png)
 
-<h3>Build AI Agents, Visually</h3>
-<a href="https://github.com/FlowiseAI/Flowise">
-<img width="100%" src="https://github.com/FlowiseAI/Flowise/blob/main/images/flowise_agentflow.gif?raw=true"></a>
+![Internet Matt flow canvas with shared dark tokens](images/ideaflow/internetmatt-dark.png)
+
+![Created, edited, saved and reloaded test checkpoints](images/ideaflow/internetmatt-save-reload.gif)
+
+The GIF loops captured test checkpoints. Native shape/direction parity, agent ports and a full declarative product shell remain future work.
+
+![Saved agent visible in the Agents view](images/ideaflow/agents-list.png)
+
+The regression verifies diagram name, DSL, nodes, edges and viewport persistence, new `AGENTFLOW` listing, and live signaling for older `{nodes, edges, viewport}` agent documents. Signaling compatibility does not establish full agent execution parity.
+
+- [Capture provenance and reproduction](images/ideaflow/README.md)
+- [Internet Matt UI, tokens and graph adapter assessment](docs/UI-GRAPH-ADAPTER.md)
+- [Run the live regression](scripts/validate-diagram-live.mjs)
+
+## Upstream engine reference
+
+The instructions below are retained from Flowise for engine reference; upstream release, cloud and support links refer to Flowise. For IdeaFlow product boundaries and integration, use the architecture and packaging documents above.
 
 ## 📚 Table of Contents
 

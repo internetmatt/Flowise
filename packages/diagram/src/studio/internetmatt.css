@@ -1,0 +1,22 @@
+.internetmatt-canvas { height: 100%; min-height: 0; overflow: hidden; }
+.ideaflow-studio.is-internetmatt {
+    background: var(--theme-colors-background-secondary);
+    color: var(--theme-colors-text);
+    font-family: var(--typography-font-family-base);
+}
+.is-internetmatt .ideaflow-toolbar, .is-internetmatt .ideaflow-side {
+    background: var(--theme-colors-surface);
+    border-color: var(--theme-colors-border);
+}
+.is-internetmatt .ideaflow-toolbar { flex-wrap: wrap; gap: var(--spacing-sm-px); }
+.ideaflow-studio.is-internetmatt button, .ideaflow-studio.is-internetmatt input, .ideaflow-studio.is-internetmatt textarea, .ideaflow-studio.is-internetmatt select {
+    background: var(--theme-colors-background);
+    color: var(--theme-colors-text);
+    border-color: var(--theme-colors-border);
+    border-radius: calc(var(--border-radius-sm) * 1px);
+}
+.ideaflow-studio.is-internetmatt button:hover { border-color: var(--theme-colors-primary); }
+.is-internetmatt :focus-visible { outline: 2px solid var(--theme-colors-primary); outline-offset: 2px; }
+.is-internetmatt .ideaflow-error { color: var(--colors-danger-default); }
+.is-internetmatt .ideaflow-note { color: var(--theme-colors-primary); }
+.internetmatt-canvas pf-flow { min-height: 0; --pf-radius: calc(var(--border-radius-sm) * 1px); }
