@@ -39,6 +39,9 @@ describe('authenticated diagram inference proxy', () => {
     afterEach(() => {
         jest.restoreAllMocks()
         delete process.env.IDEAFLOW_HOST_INFERENCE_TOKEN
+        delete process.env.IDEAFLOW_HOST_INFERENCE_BASE
+        delete process.env.PROJECTO_OPERATOR_API_KEY
+        delete process.env.PROJECTO_INFERENCE_BASE
     })
 
     it('requires a session workspace, internal header, owned record and update permission', async () => {
