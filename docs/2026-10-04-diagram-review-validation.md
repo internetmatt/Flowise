@@ -39,11 +39,22 @@ IDEAFLOW_URL=http://127.0.0.1:3000 node scripts/validate-diagram-live.mjs
 
 The script uses the existing Playwright dependency from `packages/components`. `IDEAFLOW_BROWSER_PATH` and `IDEAFLOW_BROWSER_ARGS` can select an installed Chromium. For a remote authenticated test workspace, provide `IDEAFLOW_STORAGE_STATE`; the script creates a registration/workspace only for localhost/127.0.0.1. The equivalent Cypress diagram/agent save-reload scenarios live in `packages/server/cypress/e2e/3-diagrams/save-reload.cy.js`.
 
-## Confirmed baseline failures
+## Baseline repaired (October 4 follow-up)
 
-These failures reproduce on untouched main at the base commit using the same installed dependencies:
+Untouched main at `e6ab957` reproduced 29 LangGraph type errors and the missing schematic fixture / Yjs stub-provider convergence failures. Separate baseline PR [#15](https://github.com/internetmatt/IdeaFlow/pull/15) repaired these without dependency upgrades and merged into main at `f14e88c1bcbbf4ddefb6bf023f5ad44f179485e2`. Main was merged into this branch at `9b9aece5019190eb8547a4bab898000b9f82222a`; the baseline source changes remain outside this PR's diff against main.
 
--   The full server build/typecheck reports 29 identical TypeScript errors in `src/utils/buildAgentGraph.ts` involving LangGraph types. No changed-file errors were added. The compiled server starts and serves the real persistence/signaling validation, but the overall build is not green.
--   The full diagram suite has two failing tests: schematic has no fixture in `families.test.ts`, and the stub-provider convergence assertion fails in `collab.test.ts`. The focused new tests pass. These two failures also reproduce on untouched main.
+Current validation of main plus the baseline fix:
 
-Existing workspace lockfile resolutions are preserved rather than upgrading unrelated dependencies to hide these failures. This follow-up should remain a draft until the repository's baseline check failures are reconciled.
+-   Full server typecheck (`tsc --noEmit`) and build (`tsc`, email cleanup, `gulp`) pass.
+-   Full diagram suite: 13 suites, 32 tests pass, including concurrent delayed Yjs edits and duplicate delivery.
+-   Server text-content regressions: 2 tests pass. Dynamic LangGraph node/reducer/stream/checkpoint runtime smoke test passes.
+-   Changed-file ESLint and `git diff --check` pass.
+
+Current validation of this branch with repaired main:
+
+-   Full server typecheck and build pass.
+-   Full diagram suite: 14 suites, 34 tests pass.
+-   Focused server reasoning, prediction, inference and signaling: 5 suites, 27 tests pass.
+-   Existing UI suite: 3 suites, 70 tests pass; both asset tests pass.
+
+The earlier production browser + SQLite save/reload evidence above remains valid; that live test was not repeated in this baseline follow-up. No live Projecto inference result is claimed. The Yjs repair assumes collaborators open the same persisted DSL; initial synchronization across different saved revisions remains separate work.
