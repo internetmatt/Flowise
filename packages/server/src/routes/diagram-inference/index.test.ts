@@ -34,11 +34,11 @@ describe('authenticated diagram inference proxy', () => {
         findOneBy.mockReset().mockResolvedValue({ type: 'DIAGRAM' })
         fetchMock.mockReset()
         jest.spyOn(global, 'fetch').mockImplementation(fetchMock)
-        process.env.PROJECTO_OPERATOR_API_KEY = 'test-server-only-secret'
+        process.env.IDEAFLOW_HOST_INFERENCE_TOKEN = 'test-server-only-secret'
     })
     afterEach(() => {
         jest.restoreAllMocks()
-        delete process.env.PROJECTO_OPERATOR_API_KEY
+        delete process.env.IDEAFLOW_HOST_INFERENCE_TOKEN
     })
 
     it('requires a session workspace, internal header, owned record and update permission', async () => {
@@ -97,7 +97,23 @@ describe('authenticated diagram inference proxy', () => {
         expect(JSON.stringify(response.body)).not.toContain('test-server-only-secret')
     })
 
-    it('fails closed without operator configuration and rejects oversized prompts', async () => {
+    it('prefers the host-neutral configuration over the legacy Projecto alias', async () => {
+        process.env.IDEAFLOW_HOST_INFERENCE_BASE = 'http://127.0.0.1:4999/v1'
+        process.env.PROJECTO_INFERENCE_BASE = 'http://127.0.0.1:4888/v1'
+        process.env.PROJECTO_OPERATOR_API_KEY = 'legacy-secret'
+        fetchMock.mockResolvedValue(new Response(JSON.stringify({ data: [] })))
+        const response = await request(app()).get(`${base}/models`).set('x-request-from', 'internal')
+        expect(response.status).toBe(200)
+        const [url, init] = fetchMock.mock.calls[0]
+        expect(url).toBe('http://127.0.0.1:4999/v1/models')
+        expect(init.headers.Authorization).toBe('Bearer test-server-only-secret')
+        delete process.env.IDEAFLOW_HOST_INFERENCE_BASE
+        delete process.env.PROJECTO_INFERENCE_BASE
+        delete process.env.PROJECTO_OPERATOR_API_KEY
+    })
+
+    it('fails closed without host inference configuration and rejects oversized prompts', async () => {
+        delete process.env.IDEAFLOW_HOST_INFERENCE_TOKEN
         delete process.env.PROJECTO_OPERATOR_API_KEY
         expect((await request(app()).get(`${base}/models`).set('x-request-from', 'internal')).status).toBe(502)
         expect(
