@@ -1,6 +1,6 @@
 # Make agent skills visually
 
-Status: product direction and proposed authoring contract. This document does not implement a skill exporter, publisher, or execution endpoint.
+Status: proposed authoring contract with a narrow offline graph-to-skill exporter. Publishing and an authorized pinned execution endpoint remain unimplemented. See [graph skill export](GRAPH-SKILL-EXPORT.md) for the supported Translator slice and its separate live acceptance gate.
 
 IdeaFlow's graph is the visual implementation of an agent skill. Users connect models, agents, tools, conditions, approvals, and subflows, then describe when to use that capability and what it accepts and produces.
 
@@ -22,7 +22,7 @@ IdeaFlow's graph is the visual implementation of an agent skill. Users connect m
 5. Publish a versioned package or register a versioned capability only after the relevant packaging and runtime adapters exist.
 6. Invoke it through an authorized tenant session, headlessly or from a browser. A browser is an optional view of the run.
 
-A skill package should carry agent-readable `SKILL.md` instructions and machine-readable graph binding, input/output schemas, capability requirements, fixture references and revision/digest metadata. Exact serialization and package/export commands remain to be implemented. Do not put provider or operator secrets into any package, graph, browser configuration or artifact; resolve credential references on the trusted runtime.
+A skill package carries agent-readable `SKILL.md` instructions and a versioned JSON manifest with the native graph binding, input/output schemas, capability requirements, fixture references and revision/digest metadata. The initial `pnpm skills:export --out <new-directory>` command supports the existing two-node Translator agentflow; other graph shapes and executors fail closed. Registration and publishing remain to be implemented. Do not put provider or operator secrets into any package, graph, browser configuration or artifact; resolve credential references on the trusted runtime.
 
 The graph owns workflow logic. Skill instructions explain how to use it. The visual editor and a headless runner should operate on the same pinned graph rather than maintaining separate implementations.
 
@@ -34,7 +34,7 @@ See the [host platform contract](./HOST-PLATFORM-CONTRACT.md) and [headless harn
 
 ## Next implementation slice
 
-Add a graph-to-skill binding and export path for one existing agentflow, with a pinned revision and declared input/output schemas. Test preservation of node payloads, edge handles and credential references; reject missing executors or undeclared capabilities. Then demonstrate an authorized end-to-end run of that exported skill with a durable result before marking visual skill publishing available.
+The initial offline binding/export path and regression fixtures are implemented for the existing Translator agentflow. Next, add an authorized adapter that executes the exported pinned graph, records a durable result, and proves that a draft edit during that actual run cannot change it. Keep that live gate open before marking visual skill publishing available.
 
 ## Proposed decisions and handoff
 

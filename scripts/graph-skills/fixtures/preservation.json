@@ -1,0 +1,9 @@
+{
+    "credentialReference": "credential:tenant-fixture/google-translator",
+    "nativePayload": {
+        "layout": { "collapsed": false, "labels": ["English", "日本語"] },
+        "annotation": "Preserve editor metadata without normalizing the graph",
+        "nullable": null
+    },
+    "edgePayload": { "testMetadata": { "order": [3, 1, 2], "enabled": false } }
+}
