@@ -15,36 +15,36 @@ IdeaFlow is not the former Ideas/AIONUI application. No AIONUI runtime or sessio
 
 ## System boundaries
 
-| System | Owns | Does not own |
-| --- | --- | --- |
-| Host platform (Projecto today) | Tenant provisioning, owner identity, workspace/site assignment, entitlements, inference access | IdeaFlow UI, flows, conversations, membership administration |
-| IdeaFlow | Tenant workspace, AI BizOps, ideas/conversations, employees and teammates, invites, roles, chatflow and agentflow associations, approvals, audit history | Global identity, billing entitlements, model infrastructure |
-| Flowise engine | Chatflow and agentflow definitions and execution primitives behind IdeaFlow | Product identity, tenancy policy, user-facing navigation |
-| DeerFlow UI | IdeaFlow web experience, adapted to `@internetmatt/design-tokens` | Provisioning or inference infrastructure |
-| Iggy desktop shell | Dedicated IdeaFlow desktop packaging, local launch, secure session handoff, deep links | Projecto Desktop or the former Ideas desktop |
-| `@internetmatt/design-tokens` | Shared visual tokens used by the IdeaFlow experience | Runtime behavior |
+| System                         | Owns                                                                                                                                                     | Does not own                                                 |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| Host platform (Projecto today) | Tenant provisioning, owner identity, workspace/site assignment, entitlements, inference access                                                           | IdeaFlow UI, flows, conversations, membership administration |
+| IdeaFlow                       | Tenant workspace, AI BizOps, ideas/conversations, employees and teammates, invites, roles, chatflow and agentflow associations, approvals, audit history | Global identity, billing entitlements, model infrastructure  |
+| Flowise engine                 | Chatflow and agentflow definitions and execution primitives behind IdeaFlow                                                                              | Product identity, tenancy policy, user-facing navigation     |
+| DeerFlow UI                    | IdeaFlow web experience, adapted to `@internetmatt/design-tokens`                                                                                        | Provisioning or inference infrastructure                     |
+| Iggy desktop shell             | Dedicated IdeaFlow desktop packaging, local launch, secure session handoff, deep links                                                                   | Projecto Desktop or the former Ideas desktop                 |
+| `@internetmatt/design-tokens`  | Shared visual tokens used by the IdeaFlow experience                                                                                                     | Runtime behavior                                             |
 
 IdeaFlow integrates with a host platform through the vendor-neutral [host platform contract](./HOST-PLATFORM-CONTRACT.md). Projecto is the current first-party implementation, not part of IdeaFlow's domain model. The systems integrate through explicit APIs and signed claims and must not share application databases.
 
 ## Tenancy model
 
-- One entitled owner account receives one host-provisioned IdeaFlow instance.
-- Each instance has an immutable `tenant_id` and `ideaflow_instance_id`.
-- The owner can create AI BizOps and invite employees or teammates into that instance.
-- An invited user is represented by a tenant-scoped membership and role.
-- A person may be a member of multiple tenants. If separately entitled, that person may also own another IdeaFlow instance.
-- Every persisted IdeaFlow object carries `tenant_id`; authorization is checked server-side on every request and execution.
-- Tenant ownership transfer is an explicit administrative operation and must be audited.
+-   One entitled owner account receives one host-provisioned IdeaFlow instance.
+-   Each instance has an immutable `tenant_id` and `ideaflow_instance_id`.
+-   The owner can create AI BizOps and invite employees or teammates into that instance.
+-   An invited user is represented by a tenant-scoped membership and role.
+-   A person may be a member of multiple tenants. If separately entitled, that person may also own another IdeaFlow instance.
+-   Every persisted IdeaFlow object carries `tenant_id`; authorization is checked server-side on every request and execution.
+-   Tenant ownership transfer is an explicit administrative operation and must be audited.
 
 Initial tenant roles:
 
-| Role | Capabilities |
-| --- | --- |
-| Owner | Manage tenant, members, BizOps, flows, approvals, and audit access |
-| Admin | Manage members and workspace configuration except ownership |
-| Operator | Create and run ideas, chatflows, agentflows, and approvals |
-| Member | Participate in assigned ideas and conversations |
-| Viewer | Read-only access to permitted workspace content |
+| Role     | Capabilities                                                       |
+| -------- | ------------------------------------------------------------------ |
+| Owner    | Manage tenant, members, BizOps, flows, approvals, and audit access |
+| Admin    | Manage members and workspace configuration except ownership        |
+| Operator | Create and run ideas, chatflows, agentflows, and approvals         |
+| Member   | Participate in assigned ideas and conversations                    |
+| Viewer   | Read-only access to permitted workspace content                    |
 
 ## Host platform provisioning contract
 
@@ -52,16 +52,16 @@ A host platform provisions an instance using a server-to-server request. Configu
 
 ```json
 {
-  "contract_version": "2026-09-01",
-  "tenant_id": "ten_...",
-  "ideaflow_instance_id": "ifi_...",
-  "owner_subject": "usr_...",
-  "site_origin": "https://workspace.example",
-  "inference_base_url": "https://inference.example/v1",
-  "model_catalog_url": "https://inference.example/v1/models",
-  "token_exchange_url": "https://identity.example/oauth/token",
-  "desktop_callback_scheme": "ideaflow",
-  "provisioned_at": "2026-09-28T00:00:00Z"
+    "contract_version": "2026-09-01",
+    "tenant_id": "ten_...",
+    "ideaflow_instance_id": "ifi_...",
+    "owner_subject": "usr_...",
+    "site_origin": "https://workspace.example",
+    "inference_base_url": "https://inference.example/v1",
+    "model_catalog_url": "https://inference.example/v1/models",
+    "token_exchange_url": "https://identity.example/oauth/token",
+    "desktop_callback_scheme": "ideaflow",
+    "provisioned_at": "2026-09-28T00:00:00Z"
 }
 ```
 
@@ -81,12 +81,12 @@ IdeaFlow accepts host-issued identity tokens with at least:
 
 ```json
 {
-  "sub": "usr_...",
-  "aud": "ideaflow",
-  "tenant_id": "ten_...",
-  "ideaflow_instance_id": "ifi_...",
-  "roles": ["operator"],
-  "exp": 1790557200
+    "sub": "usr_...",
+    "aud": "ideaflow",
+    "tenant_id": "ten_...",
+    "ideaflow_instance_id": "ifi_...",
+    "roles": ["operator"],
+    "exp": 1790557200
 }
 ```
 
@@ -98,12 +98,12 @@ Inference goes through the configured host inference capability using short-live
 
 The initial associations are:
 
-- `Idea` → one primary conversation session.
-- `Idea` → zero or one attached Flowise chatflow.
-- `Assistant` → zero or one attached Flowise agentflow.
-- `BizOp` → many ideas, assistants, members, approvals, and audit events.
-- Flow references store stable external IDs plus a revision/version marker; IdeaFlow does not rely on mutable display names.
-- Execution records capture tenant, actor, idea, flow ID, flow revision, model, timestamps, approval state, and outcome.
+-   `Idea` → one primary conversation session.
+-   `Idea` → zero or one attached Flowise chatflow.
+-   `Assistant` → zero or one attached Flowise agentflow.
+-   `BizOp` → many ideas, assistants, members, approvals, and audit events.
+-   Flow references store stable external IDs plus a revision/version marker; IdeaFlow does not rely on mutable display names.
+-   Execution records capture tenant, actor, idea, flow ID, flow revision, model, timestamps, approval state, and outcome.
 
 Guided walkthroughs are product metadata, separate from executable flow definitions. Each walkthrough targets stable node or control identifiers and contains ordered Driver.js steps. A missing target skips safely and emits telemetry rather than blocking the workspace.
 
@@ -115,30 +115,30 @@ Minimum boot inputs:
 
 ```json
 {
-  "site_origin": "https://workspace.example",
-  "tenant_id": "ten_...",
-  "ideaflow_instance_id": "ifi_...",
-  "token_exchange_url": "https://identity.example/oauth/token",
-  "callback_uri": "ideaflow://auth/callback"
+    "site_origin": "https://workspace.example",
+    "tenant_id": "ten_...",
+    "ideaflow_instance_id": "ifi_...",
+    "token_exchange_url": "https://identity.example/oauth/token",
+    "callback_uri": "ideaflow://auth/callback"
 }
 ```
 
 Desktop requirements:
 
-- Use the system browser for authentication and return through the `ideaflow://` deep link.
-- Store refresh material only in the operating system credential store.
-- Restrict navigation and IPC to allowlisted origins and messages.
-- Never package provider keys or host service credentials.
-- Support macOS first through the Iggy-derived build; add Windows packaging from the same application contract.
-- Load the tenant's host-assigned `site_origin`, not a hard-coded environment.
+-   Use the system browser for authentication and return through the `ideaflow://` deep link.
+-   Store refresh material only in the operating system credential store.
+-   Restrict navigation and IPC to allowlisted origins and messages.
+-   Never package provider keys or host service credentials.
+-   Support macOS first through the Iggy-derived build; add Windows packaging from the same application contract.
+-   Load the tenant's host-assigned `site_origin`, not a hard-coded environment.
 
 ## Compatibility during transition
 
-- The GitHub repository may remain named `OpenIdeas` until the settings-level rename to `IdeaFlow` is performed.
-- Existing `OPENIDEAS_*`, `IDEUS_*`, and Flowise-compatible environment names may remain as deprecated aliases during a measured transition.
-- New product-facing code and documentation should use **IdeaFlow**.
-- Port `3010` remains the local development default until runtime configuration is consolidated.
-- The former `internetmatt/Ideas` repository is not an IdeaFlow dependency. Reusable contracts may be extracted before that repository is archived.
+-   The GitHub repository was renamed from `OpenIdeas` to `IdeaFlow` on 2026-09-29. The name OpenIdeas now refers to the portable ideas-inbox format ([plan](./plans/2026-10-06-openideas-inbox.md)), so old `internetmatt/OpenIdeas` links should not be relied on.
+-   Existing `OPENIDEAS_*`, `IDEUS_*`, and Flowise-compatible environment names may remain as deprecated aliases during a measured transition.
+-   New product-facing code and documentation should use **IdeaFlow**.
+-   Port `3010` remains the local development default until runtime configuration is consolidated.
+-   The former `internetmatt/Ideas` repository has been deleted and is not an IdeaFlow dependency.
 
 ## Delivery sequence
 
@@ -155,10 +155,10 @@ Desktop requirements:
 
 The foundation is ready for implementation when:
 
-- A host-provisioned test owner can idempotently provision exactly one IdeaFlow instance.
-- The owner can invite a teammate whose access is enforced by tenant-scoped server checks.
-- An idea can attach and run a versioned chatflow; an assistant can attach and run a versioned agentflow.
-- Executions use host-provided inference without exposing provider credentials.
-- A Driver.js walkthrough can animate a flow without mutating it.
-- The Iggy-derived desktop shell authenticates, resolves the assigned site, and opens the same tenant workspace as the web app.
-- Cross-tenant reads, writes, executions, and desktop handoffs are covered by negative tests.
+-   A host-provisioned test owner can idempotently provision exactly one IdeaFlow instance.
+-   The owner can invite a teammate whose access is enforced by tenant-scoped server checks.
+-   An idea can attach and run a versioned chatflow; an assistant can attach and run a versioned agentflow.
+-   Executions use host-provided inference without exposing provider credentials.
+-   A Driver.js walkthrough can animate a flow without mutating it.
+-   The Iggy-derived desktop shell authenticates, resolves the assigned site, and opens the same tenant workspace as the web app.
+-   Cross-tenant reads, writes, executions, and desktop handoffs are covered by negative tests.

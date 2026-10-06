@@ -14,9 +14,9 @@ The local profile resolves logical storage/calendar resources to authorized vaul
 
 ## Alternatives
 
-- Copy documents without stable IDs: easy start, but duplicate work and conflicting statuses.
-- One shared application database: simpler joins, but couples tenancy and domain ownership.
-- Versioned work records and authorized references: requires adapter/conflict handling, while preserving boundaries.
+-   Copy documents without stable IDs: easy start, but duplicate work and conflicting statuses.
+-   One shared application database: simpler joins, but couples tenancy and domain ownership.
+-   Versioned work records and authorized references: requires adapter/conflict handling, while preserving boundaries.
 
 ## Consequences
 
@@ -29,5 +29,7 @@ Import one synthetic OpenIdea, invoke one pinned skill through an available auth
 ## Revisit when
 
 The envelope cannot express collaboration/conflict semantics or reference retention prevents reproducible work.
+
+First concrete profile: the [OpenIdeas inbox plan](../plans/2026-10-06-openideas-inbox.md) (Google Drive and SharePoint folder layout over this envelope).
 
 Evidence: [visual skill contract](../VISUAL-AGENT-SKILLS.md), [host contract](../HOST-PLATFORM-CONTRACT.md). Calendar/vault/Drive and OfficeCLI integration are follow-up work, not demonstrated capabilities.
