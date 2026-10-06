@@ -37,7 +37,9 @@
         "postinstall": "husky install",
         "migration:create": "pnpm typeorm migration:create",
         "changeset": "changeset",
-        "changeset:version": "changeset version"
+        "changeset:version": "changeset version",
+        "skills:export": "node scripts/export-graph-skill.mjs",
+        "test:graph-skills": "node --test scripts/graph-skills/*.test.mjs"
     },
     "lint-staged": {
         "*.{js,jsx,ts,tsx,json,md}": "eslint --fix"
@@ -65,7 +67,8 @@
         "rimraf": "^3.0.2",
         "run-script-os": "^1.1.6",
         "turbo": "1.10.16",
-        "typescript": "^5.4.5"
+        "typescript": "^5.4.5",
+        "ajv": "8.20.0"
     },
     "pnpm": {
         "onlyBuiltDependencies": [

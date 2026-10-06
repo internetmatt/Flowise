@@ -1,0 +1,135 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "urn:ideaflow:graph-skill:1",
+    "definitions": {
+        "digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        "source": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["repository", "revision", "path"],
+            "properties": {
+                "repository": { "const": "internetmatt/IdeaFlow" },
+                "revision": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+                "path": { "type": "string", "minLength": 1 }
+            }
+        },
+        "binding": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "schemaVersion",
+                "name",
+                "version",
+                "description",
+                "instructions",
+                "graphId",
+                "inputSchema",
+                "outputSchema",
+                "capabilities",
+                "fixtures"
+            ],
+            "properties": {
+                "schemaVersion": { "const": 1 },
+                "name": { "type": "string", "maxLength": 64, "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+                "version": { "type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$" },
+                "description": { "type": "string", "minLength": 1 },
+                "instructions": { "type": "string", "minLength": 1 },
+                "graphId": { "type": "string", "minLength": 1 },
+                "inputSchema": { "type": "object" },
+                "outputSchema": { "type": "object" },
+                "capabilities": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+                "fixtures": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": ["name", "input", "output"],
+                        "properties": { "name": { "type": "string", "minLength": 1 }, "input": {}, "output": {} }
+                    }
+                }
+            }
+        },
+        "executor": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "source", "digest", "entrypoint"],
+            "properties": {
+                "name": { "type": "string", "minLength": 1 },
+                "source": { "type": "string", "minLength": 1 },
+                "digest": { "$ref": "#/definitions/digest" },
+                "entrypoint": { "enum": ["run", "init"] }
+            }
+        },
+        "file": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["file", "digest"],
+            "properties": {
+                "file": { "type": "string", "minLength": 1 },
+                "digest": { "$ref": "#/definitions/digest" }
+            }
+        },
+        "manifest": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "schemaVersion",
+                "kind",
+                "name",
+                "version",
+                "description",
+                "inputSchema",
+                "outputSchema",
+                "capabilities",
+                "graph",
+                "executors",
+                "credentialReferences",
+                "skillMd",
+                "fixtures",
+                "acceptance"
+            ],
+            "properties": {
+                "schemaVersion": { "const": 1 },
+                "kind": { "const": "ideaflow.graph-skill" },
+                "name": { "$ref": "#/definitions/binding/properties/name" },
+                "version": { "$ref": "#/definitions/binding/properties/version" },
+                "description": { "$ref": "#/definitions/binding/properties/description" },
+                "inputSchema": { "type": "object" },
+                "outputSchema": { "type": "object" },
+                "capabilities": { "$ref": "#/definitions/binding/properties/capabilities" },
+                "graph": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["id", "format", "file", "revision", "digest", "source"],
+                    "properties": {
+                        "id": { "type": "string", "minLength": 1 },
+                        "format": { "const": "ideaflow.agentflow.v2" },
+                        "file": { "const": "graph.json" },
+                        "revision": { "$ref": "#/definitions/digest" },
+                        "digest": { "$ref": "#/definitions/digest" },
+                        "source": { "$ref": "#/definitions/source" }
+                    }
+                },
+                "executors": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/executor" } },
+                "credentialReferences": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": ["path", "reference"],
+                        "properties": { "path": { "type": "string" }, "reference": { "type": "string", "minLength": 1 } }
+                    }
+                },
+                "skillMd": { "$ref": "#/definitions/file" },
+                "fixtures": { "$ref": "#/definitions/file" },
+                "acceptance": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["liveRun"],
+                    "properties": { "liveRun": { "const": "pending" } }
+                }
+            }
+        }
+    }
+}

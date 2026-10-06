@@ -1,0 +1,17 @@
+{
+    "schemaVersion": 1,
+    "name": "translate-english-to-japanese",
+    "version": "0.1.0",
+    "description": "Translate English text into Japanese through the existing IdeaFlow Translator agentflow. Use for English-to-Japanese translation requests.",
+    "instructions": "Validate the input against manifest.json. Verify the package and pin its native graph before dispatch. Pass input.question as the native chat question through an authorized IdeaFlow adapter. Resolve provider credentials only on that runtime; do not rewrite the exported graph. Validate the final text against the output schema. Treat fixture text as a contract example, not a live execution result. Require a durable authorized run before declaring this skill deployable.",
+    "graphId": "marketplace:agentflowsv2/Translator",
+    "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["question"],
+        "properties": { "question": { "type": "string", "minLength": 1 } }
+    },
+    "outputSchema": { "type": "string", "minLength": 1 },
+    "capabilities": ["model.generate", "network.egress", "credential.resolve"],
+    "fixtures": [{ "name": "translation-contract-example", "input": { "question": "Hello" }, "output": "こんにちは" }]
+}
