@@ -31,7 +31,10 @@ export function assignLocationIfUsable(value, locationRef = typeof window !== 'u
     return true
 }
 
-export function replaceMissingFlowPath(locationRef = typeof window !== 'undefined' ? window.location : null, historyRef = typeof window !== 'undefined' ? window.history : null) {
+export function replaceMissingFlowPath(
+    locationRef = typeof window !== 'undefined' ? window.location : null,
+    historyRef = typeof window !== 'undefined' ? window.history : null
+) {
     if (!locationRef || !historyRef) return false
     const path = locationRef.pathname || ''
     if (!isMissingFlowPath(path) && path !== '/undefined' && path !== '/null') return false
