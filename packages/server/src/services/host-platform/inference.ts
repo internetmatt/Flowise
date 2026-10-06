@@ -20,11 +20,7 @@ export function resolveHostInferenceConfig(env: NodeJS.ProcessEnv = process.env)
     return { baseUrl, authorization: `Bearer ${token}` }
 }
 
-export async function hostInferenceRequest(
-    path: '/models' | '/chat/completions',
-    body?: unknown,
-    env: NodeJS.ProcessEnv = process.env
-) {
+export async function hostInferenceRequest(path: '/models' | '/chat/completions', body?: unknown, env: NodeJS.ProcessEnv = process.env) {
     const config = resolveHostInferenceConfig(env)
     return fetch(`${config.baseUrl.href.replace(/\/+$/, '')}${path}`, {
         method: body === undefined ? 'GET' : 'POST',

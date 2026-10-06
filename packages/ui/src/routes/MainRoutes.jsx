@@ -352,7 +352,11 @@ const MainRoutes = {
         },
         {
             path: '/workflow-management',
-            element: <RequireAuth permission={'agentflows:view'}><WorkflowManagement /></RequireAuth>
+            element: (
+                <RequireAuth permission={'agentflows:view'}>
+                    <WorkflowManagement />
+                </RequireAuth>
+            )
         },
         {
             path: '/sso-success',

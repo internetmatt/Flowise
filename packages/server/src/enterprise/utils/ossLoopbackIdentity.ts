@@ -64,9 +64,7 @@ export async function resolveOssLoopbackUser(req: Request): Promise<LoggedInUser
         (await roleRepo.findOne({ where: { name: GeneralRole.OWNER, organizationId: organization.id } })) ||
         (await roleRepo.findOne({ where: { name: GeneralRole.OWNER } }))
 
-    const user = workspace.createdBy
-        ? await app.AppDataSource.getRepository(User).findOne({ where: { id: workspace.createdBy } })
-        : null
+    const user = workspace.createdBy ? await app.AppDataSource.getRepository(User).findOne({ where: { id: workspace.createdBy } }) : null
 
     return {
         id: user?.id || workspace.createdBy || organization.createdBy || 'oss-loopback',

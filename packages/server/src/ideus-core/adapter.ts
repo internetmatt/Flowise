@@ -47,9 +47,7 @@ export type OpenIdeasChatSessionPointer = {
     chatflowId: string | null
 }
 
-export function openIdeasPointerFromWorkflowMeta(
-    meta: CoreWorkflowMetaPointer | null | undefined
-): OpenIdeasFlowPointer | null {
+export function openIdeasPointerFromWorkflowMeta(meta: CoreWorkflowMetaPointer | null | undefined): OpenIdeasFlowPointer | null {
     if (meta?.engine !== 'flowise' || !meta.externalFlowId?.trim()) {
         return null
     }
@@ -90,11 +88,7 @@ export function openIdeasChatFromCoreSession(
 
 /** Origins Core uses to iframe this canvas. Set `IFRAME_ORIGINS` to this CSV locally. */
 export function coreCanvasIframeOrigins(): string[] {
-    return [
-        'http://localhost:5678',
-        'http://localhost:15678',
-        'https://wt-flowise-replacement.localhost'
-    ]
+    return ['http://localhost:5678', 'http://localhost:15678', 'https://wt-flowise-replacement.localhost']
 }
 
 export function coreCanvasIframeOriginsCsv(): string {
