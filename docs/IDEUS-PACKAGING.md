@@ -1,31 +1,33 @@
-# OpenIdeas — Ideus packaging
+# IdeaFlow: Ideus packaging
 
-OpenIdeas is the Ideus visual-agent canvas. **Origin (what we change):** [github.com/internetmatt/OpenIdeas](https://github.com/internetmatt/OpenIdeas). Apache-2.0 upstream is FlowiseAI/Flowise — do not ship the product as “Flowise.”
+IdeaFlow (formerly OpenIdeas) is the Ideus visual-agent canvas. **Origin (what we change):** [github.com/internetmatt/IdeaFlow](https://github.com/internetmatt/IdeaFlow). Apache-2.0 upstream is FlowiseAI/Flowise; do not ship the product as “Flowise.”
 
-Local checkout: `upstreams/OpenIdeas` (chatflows + `@flowiseai/agentflow` React canvas) in parallel with AskDilly-Core.
+The name OpenIdeas now means the portable ideas-inbox format, not this repository. See [the OpenIdeas inbox plan](./plans/2026-10-06-openideas-inbox.md).
+
+Local checkout: `upstreams/IdeaFlow` (chatflows + `@flowiseai/agentflow` React canvas) in parallel with AskDilly-Core.
 
 ## Docs this repo owns
 
-| Surface | Path | Published to VitePress? |
-| --- | --- | --- |
-| This packaging card | `docs/IDEUS-PACKAGING.md` | Yes — synced to `/family/openideas` |
-| Core schema adapter | `packages/server/src/ideus-core/` | **No** (stay here; Core copies the contract) |
-| Package READMEs | `packages/agentflow/README.md`, `packages/ui/README.md`, `packages/server/README.md` | **No** (stay here) |
-| Root README | `README.md` | No |
+| Surface             | Path                                                                                 | Published to VitePress?                      |
+| ------------------- | ------------------------------------------------------------------------------------ | -------------------------------------------- |
+| This packaging card | `docs/IDEUS-PACKAGING.md`                                                            | Yes — synced to `/family/openideas`          |
+| Core schema adapter | `packages/server/src/ideus-core/`                                                    | **No** (stay here; Core copies the contract) |
+| Package READMEs     | `packages/agentflow/README.md`, `packages/ui/README.md`, `packages/server/README.md` | **No** (stay here)                           |
+| Root README         | `README.md`                                                                          | No                                           |
 
-The GitBook **rewrite source** on this site lives under `/flowise/` (synced from `upstreams/FlowiseDocs`). Pages there still say Flowise because they are Apache-2.0 upstream text. Product name is **OpenIdeas**. Licenses: AskDilly-Core VitePress `/licenses/`.
+The GitBook **rewrite source** on this site lives under `/flowise/` (synced from `upstreams/FlowiseDocs`). Pages there still say Flowise because they are Apache-2.0 upstream text. Product name is **IdeaFlow**. Licenses: AskDilly-Core VitePress `/licenses/`.
 
 ## Local
 
 Ideus sibling port map (do not collide with Marketing UI `:3005` or Ideas `:3011`):
 
-| Surface | URL / port |
-| --- | --- |
-| OpenIdeas primary | http://localhost:3010 |
-| OpenIdeas whitelabel | :3013 |
-| Upstream Flowise default (avoid on this laptop) | :3000 |
+| Surface                                         | URL / port            |
+| ----------------------------------------------- | --------------------- |
+| IdeaFlow primary                                | http://localhost:3010 |
+| IdeaFlow whitelabel                             | :3013                 |
+| Upstream Flowise default (avoid on this laptop) | :3000                 |
 
-`packages/server` still *falls back* to `:3000` if `PORT` is unset (upstream binary). Env examples and [`docs/env.ideus.example`](./env.ideus.example) default **`PORT=3010`**. Prefer that when Core, Ideas, and Atlas are also running.
+`packages/server` still _falls back_ to `:3000` if `PORT` is unset (upstream binary). Env examples and [`docs/env.ideus.example`](./env.ideus.example) default **`PORT=3010`**. Prefer that when Core, Ideas, and Atlas are also running.
 
 ## Core canvas swap (`wt-flowise-replacement`)
 
@@ -34,7 +36,7 @@ AskDilly-Core stores `{ engine: 'flowise', externalFlowId }` on the workflow row
 ```bash
 # Core worktree
 IDEUS_FLOWISE_BASE_URL=http://localhost:3010
-IDEUS_FLOWISE_API_KEY=<OpenIdeas workspace key, server-side only>
+IDEUS_FLOWISE_API_KEY=<IdeaFlow workspace key, server-side only>
 ```
 
 Mapping types live in [`packages/server/src/ideus-core/`](../packages/server/src/ideus-core/README.md). `engine: 'flowise'` is a wire name until Core ships a rename PR.
@@ -45,8 +47,8 @@ Figma catalog id: `openideas`. Agentflow / observe primaries use AskDilly-Core `
 
 ## Publish boundary
 
-- **Do** keep this packaging card for VitePress sync.
-- **Do not** vendor the GitBook into Ideus Wiki as customer docs.
-- **No OpenAPI** from this repo is on the VitePress allowlist.
+-   **Do** keep this packaging card for VitePress sync.
+-   **Do not** vendor the GitBook into Ideus Wiki as customer docs.
+-   **No OpenAPI** from this repo is on the VitePress allowlist.
 
 Aggregator: sibling `AskDilly-Core/docs` (`pnpm docs:sync-family`).
