@@ -13,7 +13,7 @@ import {
     IServerSideEventStreamer
 } from 'flowise-components'
 import { omit, cloneDeep, flatten, uniq } from 'lodash'
-import { StateGraph, END, START, BaseChannel } from '@langchain/langgraph'
+import { StateGraph, END, START } from '@langchain/langgraph'
 import { Document } from '@langchain/core/documents'
 import { StatusCodes } from 'http-status-codes'
 import { v4 as uuidv4 } from 'uuid'
@@ -34,7 +34,6 @@ import { messageContentText } from './agentGraphTypes'
 // Component interfaces describe channel reducers; runtime state contains their values.
 type TeamGraphState = Omit<ITeamState, 'messages'> & { messages: BaseMessage[] }
 type SequentialGraphState = Record<string, any> & { messages: BaseMessage[] }
-type GraphChannels<S> = { [K in keyof S]-?: BaseChannel<S[K], S[K]> }
 
 /**
  * Build Agent Graph
@@ -473,14 +472,7 @@ const compileMultiAgentsGraph = async (params: MultiAgentsGraphParams) => {
 
     if (summarization) channels.summarization = 'summarize'
 
-    const workflowGraph = new StateGraph<
-        GraphChannels<TeamGraphState>,
-        TeamGraphState,
-        Partial<TeamGraphState>,
-        string,
-        GraphChannels<TeamGraphState>,
-        GraphChannels<TeamGraphState>
-    >({
+    const workflowGraph = new StateGraph<TeamGraphState, Partial<TeamGraphState>, string>({
         //@ts-ignore
         channels
     })
@@ -691,14 +683,7 @@ const compileSeqAgentsGraph = async (params: SeqAgentsGraphParams) => {
         }
     }
 
-    let seqGraph = new StateGraph<
-        GraphChannels<SequentialGraphState>,
-        SequentialGraphState,
-        Partial<SequentialGraphState>,
-        string,
-        GraphChannels<SequentialGraphState>,
-        GraphChannels<SequentialGraphState>
-    >({
+    let seqGraph = new StateGraph<SequentialGraphState, Partial<SequentialGraphState>, string>({
         //@ts-ignore
         channels
     })
