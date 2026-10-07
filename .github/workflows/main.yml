@@ -32,6 +32,7 @@ jobs:
             - run: pnpm install
             - run: pnpm test:graph-skills
             - run: pnpm lint
+            - run: pnpm --filter @openideas/diagram test
             - run: pnpm build
               env:
                   NODE_OPTIONS: '--max_old_space_size=4096'
@@ -52,3 +53,13 @@ jobs:
                   wait-on: 'http://localhost:3000'
                   wait-on-timeout: 120
                   browser: chrome
+            - name: Upload browser test evidence
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: cypress-browser-evidence
+                  path: |
+                      packages/server/cypress/screenshots
+                      packages/server/cypress/videos
+                  if-no-files-found: warn
+                  retention-days: 14

@@ -1,3 +1,4 @@
+import ELK from 'elkjs/lib/elk-api.js'
 import type { FlowDirection } from '../mermaid/flowchart'
 import type { DiagramEdge, DiagramNode } from '../schema'
 
@@ -72,8 +73,6 @@ export function fallbackGrid(nodes: DiagramNode[], direction: FlowDirection): Di
     }))
 }
 
-type WorkerReply = { ok: true; result: { children?: Array<{ id: string; x?: number; y?: number }> } } | { ok: false; error: string }
-
 export function layoutWithElk(
     nodes: DiagramNode[],
     edges: DiagramEdge[],
@@ -92,21 +91,32 @@ export function layoutWithElk(
             worker.terminate()
             reject(new Error('ELK worker timed out'))
         }, 15000)
-        worker.onmessage = (event: MessageEvent<WorkerReply>) => {
+        const cleanup = () => {
             clearTimeout(timer)
             worker.terminate()
-            if (!event.data?.ok) {
-                reject(new Error(event.data?.error || 'ELK layout failed'))
-                return
-            }
-            resolve(applyElkPositions(nodes, event.data.result))
         }
         worker.onerror = () => {
-            clearTimeout(timer)
-            worker.terminate()
+            cleanup()
             reject(new Error('ELK worker failed'))
         }
-        worker.postMessage(graph)
+        try {
+            // Use ELK's client protocol: register algorithms, correlate replies,
+            // then apply the layout. The staged asset is the matching raw worker.
+            const elk = new ELK({ workerFactory: () => worker })
+            elk.layout(graph).then(
+                (result) => {
+                    cleanup()
+                    resolve(applyElkPositions(nodes, result))
+                },
+                (error) => {
+                    cleanup()
+                    reject(error)
+                }
+            )
+        } catch (error) {
+            cleanup()
+            reject(error)
+        }
     })
 }
 
